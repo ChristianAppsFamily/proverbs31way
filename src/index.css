@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 36 45% 97%;
+    --foreground: 60 7% 10%;
+    --card: 30 35% 93%;
+    --card-foreground: 60 7% 10%;
+    --popover: 36 45% 97%;
+    --popover-foreground: 60 7% 10%;
+    --primary: 7 55% 59%;
+    --primary-foreground: 36 45% 97%;
+    --secondary: 95 28% 49%;
+    --secondary-foreground: 36 45% 97%;
+    --muted: 30 35% 93%;
+    --muted-foreground: 30 10% 50%;
+    --accent: 7 55% 59%;
+    --accent-foreground: 36 45% 97%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 30 20% 81%;
+    --input: 30 20% 81%;
+    --ring: 7 55% 59%;
+    --radius: 0.625rem;
+  }
+
+  body {
+    @apply bg-way-white text-way-text font-sans antialiased;
+    font-feature-settings: "kern" 1, "liga" 1;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif;
+  }
+
+  ::selection {
+    background-color: rgba(212, 105, 90, 0.25);
+  }
+}
+
+@layer components {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .eyebrow {
+    @apply font-sans text-[11px] font-medium tracking-[0.14em] uppercase text-way-gray;
+  }
+
+  .verse-text {
+    @apply font-serif italic text-way-text leading-relaxed;
+  }
+
+  .btn-pill {
+    @apply inline-flex items-center justify-center px-7 py-3 rounded-pill font-sans text-sm font-medium transition-all duration-200;
+  }
+
+  .btn-pill-primary {
+    @apply btn-pill bg-way-rose text-white hover:opacity-90;
+  }
+
+  .btn-pill-ghost {
+    @apply btn-pill bg-transparent text-way-text hover:bg-way-surface;
+  }
+}
+
+@layer utilities {
+  .will-change-transform {
+    will-change: transform;
+  }
+}
