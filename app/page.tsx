@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 
 const colors = {
@@ -133,7 +133,69 @@ function WaitlistCapture() {
   );
 }
 
+function WaitlistSocialProof({ count }: { count: number | null }) {
+  if (count === 0) {
+    return (
+      <p
+        className="text-lg mb-6 max-w-md mx-auto leading-relaxed"
+        style={{
+          fontFamily: '"Cormorant Garamond", Georgia, serif',
+          fontStyle: "italic",
+          color: colors.text,
+        }}
+      >
+        Be the first to join
+      </p>
+    );
+  }
+
+  const numLabel = count === null ? "—" : count.toLocaleString();
+
+  return (
+    <p
+      className="text-lg mb-6 max-w-md mx-auto"
+      style={{
+        fontFamily: '"DM Sans", system-ui, sans-serif',
+        color: colors.muted,
+      }}
+    >
+      <span className="font-medium" style={{ color: colors.text }}>
+        {numLabel}
+      </span>{" "}
+      sisters already waiting
+    </p>
+  );
+}
+
 export default function LandingPage() {
+  const [count, setCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    const fetchCount = async () => {
+      const { count } = await supabase
+        .from("waitlist")
+        .select("*", { count: "exact", head: true });
+      setCount(count);
+    };
+
+    fetchCount();
+
+    const channel = supabase
+      .channel("waitlist-count")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "waitlist" },
+        () => {
+          fetchCount();
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
   return (
     <main
       className="min-h-[100dvh] flex items-center justify-center px-6 py-24"
@@ -167,6 +229,7 @@ export default function LandingPage() {
         >
           Enter your email to join the waitlist and be among the first Founding Sisters.
         </p>
+        <WaitlistSocialProof count={count} />
         <WaitlistCapture />
       </section>
     </main>
