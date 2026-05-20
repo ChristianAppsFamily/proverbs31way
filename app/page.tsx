@@ -13,6 +13,8 @@ const colors = {
   muted: "#6B6B68",
 } as const;
 
+const mutedItalic = "#7A7A72";
+
 type WaitlistStatus = "idle" | "loading" | "success" | "error";
 
 function WaitlistCapture() {
@@ -133,37 +135,136 @@ function WaitlistCapture() {
   );
 }
 
-function WaitlistSocialProof({ count }: { count: number | null }) {
-  if (count === 0) {
-    return (
-      <p
-        className="text-lg mb-6 max-w-md mx-auto leading-relaxed"
-        style={{
-          fontFamily: '"Cormorant Garamond", Georgia, serif',
-          fontStyle: "italic",
-          color: colors.text,
-        }}
-      >
-        Be the first to join
-      </p>
-    );
-  }
-
-  const numLabel = count === null ? "—" : count.toLocaleString();
+function WaitlistCounterSection({ count }: { count: number | null }) {
+  const nameLine =
+    count === 1
+      ? "woman has already added her name."
+      : "women have already added their name.";
 
   return (
-    <p
-      className="text-lg mb-6 max-w-md mx-auto"
-      style={{
-        fontFamily: '"DM Sans", system-ui, sans-serif',
-        color: colors.muted,
-      }}
-    >
-      <span className="font-medium" style={{ color: colors.text }}>
-        {numLabel}
-      </span>{" "}
-      sisters already waiting
-    </p>
+    <section className="w-full py-24 px-6" style={{ backgroundColor: colors.base }}>
+      <div className="max-w-[480px] mx-auto text-center">
+        <p
+          className="mb-6"
+          style={{
+            fontFamily: '"DM Sans", system-ui, sans-serif',
+            fontSize: "11px",
+            fontWeight: 500,
+            letterSpacing: "0.2em",
+            textTransform: "uppercase",
+            color: colors.sage,
+          }}
+        >
+          FROM THE WAITING ROOM
+        </p>
+
+        {count === 0 ? (
+          <p
+            className="text-[56px] md:text-[72px] leading-none mb-6"
+            style={{
+              fontFamily: '"Cormorant Garamond", Georgia, serif',
+              fontStyle: "italic",
+              fontWeight: 300,
+              color: colors.text,
+            }}
+          >
+            Be the first to join
+          </p>
+        ) : (
+          <p
+            className="text-[56px] md:text-[72px] leading-none mb-6 tabular-nums"
+            style={{
+              fontFamily: '"Cormorant Garamond", Georgia, serif',
+              fontWeight: 300,
+              color: colors.text,
+            }}
+          >
+            {count === null ? "—" : count.toLocaleString()}
+          </p>
+        )}
+
+        <p
+          className="mb-4"
+          style={{
+            fontFamily: '"DM Sans", system-ui, sans-serif',
+            fontSize: "18px",
+            color: colors.text,
+          }}
+        >
+          {nameLine}
+        </p>
+
+        <p
+          style={{
+            fontFamily: '"DM Sans", system-ui, sans-serif',
+            fontSize: "15px",
+            fontStyle: "italic",
+            color: mutedItalic,
+          }}
+        >
+          They are waiting for the same thing you are.
+        </p>
+      </div>
+    </section>
+  );
+}
+
+function ScriptureAnchorSection() {
+  return (
+    <section className="w-full py-24 px-6" style={{ backgroundColor: colors.surface }}>
+      <div className="max-w-[560px] mx-auto text-center">
+        <p
+          style={{
+            fontFamily: '"DM Sans", system-ui, sans-serif',
+            fontSize: "11px",
+            fontWeight: 500,
+            letterSpacing: "0.2em",
+            textTransform: "uppercase",
+            color: colors.sage,
+            marginBottom: "32px",
+          }}
+        >
+          WHAT THE WORD SAYS ABOUT COMMUNITY
+        </p>
+
+        <p
+          className="text-[24px] md:text-[32px] leading-[1.6]"
+          style={{
+            fontFamily: '"Cormorant Garamond", Georgia, serif',
+            fontStyle: "italic",
+            color: colors.text,
+          }}
+        >
+          Two are better than one, because they have a good return for their labor: If either of them
+          falls down, one can help the other up.
+        </p>
+
+        <div
+          className="mx-auto"
+          style={{
+            width: "48px",
+            height: "1px",
+            backgroundColor: colors.rose,
+            marginTop: "24px",
+            marginBottom: "24px",
+          }}
+          aria-hidden
+        />
+
+        <p
+          style={{
+            fontFamily: '"DM Sans", system-ui, sans-serif',
+            fontSize: "13px",
+            fontWeight: 500,
+            letterSpacing: "0.15em",
+            textTransform: "uppercase",
+            color: colors.sage,
+          }}
+        >
+          ECCLESIASTES 4:9–10
+        </p>
+      </div>
+    </section>
   );
 }
 
@@ -197,41 +298,45 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <main
-      className="min-h-[100dvh] flex items-center justify-center px-6 py-24"
-      style={{ backgroundColor: colors.surface }}
-    >
-      <section id="waitlist" className="w-full max-w-2xl text-center">
-        <p
-          className="text-[11px] font-medium tracking-[0.14em] uppercase mb-4"
-          style={{
-            fontFamily: '"DM Sans", system-ui, sans-serif',
-            color: colors.sage,
-          }}
-        >
-          The doors open soon
-        </p>
-        <h1
-          className="text-4xl md:text-5xl font-medium leading-tight mb-5"
-          style={{
-            fontFamily: '"Cormorant Garamond", Georgia, serif',
-            color: colors.text,
-          }}
-        >
-          Your sisters are waiting.
-        </h1>
-        <p
-          className="text-lg mb-10 max-w-md mx-auto"
-          style={{
-            fontFamily: '"DM Sans", system-ui, sans-serif',
-            color: colors.muted,
-          }}
-        >
-          Enter your email to join the waitlist and be among the first Founding Sisters.
-        </p>
-        <WaitlistSocialProof count={count} />
-        <WaitlistCapture />
+    <main className="min-h-[100dvh] flex flex-col w-full">
+      <section
+        id="waitlist"
+        className="flex flex-1 items-center justify-center px-6 py-24 w-full"
+        style={{ backgroundColor: colors.surface }}
+      >
+        <div className="w-full max-w-2xl text-center">
+          <p
+            className="text-[11px] font-medium tracking-[0.14em] uppercase mb-4"
+            style={{
+              fontFamily: '"DM Sans", system-ui, sans-serif',
+              color: colors.sage,
+            }}
+          >
+            The doors open soon
+          </p>
+          <h1
+            className="text-4xl md:text-5xl font-medium leading-tight mb-5"
+            style={{
+              fontFamily: '"Cormorant Garamond", Georgia, serif',
+              color: colors.text,
+            }}
+          >
+            Your sisters are waiting.
+          </h1>
+          <p
+            className="text-lg mb-10 max-w-md mx-auto"
+            style={{
+              fontFamily: '"DM Sans", system-ui, sans-serif',
+              color: colors.muted,
+            }}
+          >
+            Enter your email to join the waitlist and be among the first Founding Sisters.
+          </p>
+          <WaitlistCapture />
+        </div>
       </section>
+      <WaitlistCounterSection count={count} />
+      <ScriptureAnchorSection />
     </main>
   );
 }

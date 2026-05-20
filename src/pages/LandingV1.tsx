@@ -4,34 +4,13 @@
  * No product feature demos. Only emotion, aspiration, and belonging.
  */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { supabaseBrowser } from "@/lib/supabaseBrowser";
 
 /* ═══════════════════════════════════════════
    Data
    ═══════════════════════════════════════════ */
-
-const testimonials = [
-  {
-    quote: "I have never felt less alone in my walk with God.",
-    name: "Sarah M.",
-    role: "Founding Sister",
-    image: "/images/v1-sister.jpg",
-  },
-  {
-    quote: "This is the community I prayed for but didn't know existed.",
-    name: "Grace T.",
-    role: "Beta Member",
-    image: "/images/v1-prayer.jpg",
-  },
-  {
-    quote: "Real conversation. No performance. Just sisters.",
-    name: "Amara K.",
-    role: "Founding Sister",
-    image: "/images/v1-diverse.jpg",
-  },
-];
 
 const roomsTeaser = [
   { name: "The Garden", desc: "Daily scripture to start your morning rooted." },
@@ -40,6 +19,16 @@ const roomsTeaser = [
   { name: "The Letter", desc: "Write your heart. Be deeply known." },
   { name: "The Sanctuary", desc: "Stillness, prayer, and sacred rest." },
 ];
+
+/** Matches app/page waitlist counter + scripture (hex from design spec). */
+const waitlistSectionColors = {
+  base: "#FAFAF8",
+  rose: "#D4847A",
+  sage: "#6B9E8F",
+  text: "#1C1C1A",
+  surface: "#F2F0EB",
+  mutedItalic: "#7A7A72",
+} as const;
 
 const foundingBenefits = [
   "Lifetime Founding Sister badge on your profile",
@@ -115,6 +104,36 @@ export default function LandingV1() {
   const [email, setEmail] = useState("");
   const [waitlistStatus, setWaitlistStatus] = useState<WaitlistStatus>("idle");
   const [waitlistError, setWaitlistError] = useState("");
+  const [waitlistCount, setWaitlistCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    const client = supabaseBrowser;
+    if (!client) return;
+
+    const fetchCount = async () => {
+      const { count } = await client
+        .from("waitlist")
+        .select("*", { count: "exact", head: true });
+      setWaitlistCount(count);
+    };
+
+    fetchCount();
+
+    const channel = client
+      .channel("waitlist-count-landing")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "waitlist" },
+        () => {
+          fetchCount();
+        },
+      )
+      .subscribe();
+
+    return () => {
+      client.removeChannel(channel);
+    };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -336,39 +355,127 @@ export default function LandingV1() {
       </section>
 
       {/* ═══════════════════════════════════════════
-          4. TESTIMONIALS
+          4. WAITLIST COUNTER + SCRIPTURE (replaces testimonials)
           ═══════════════════════════════════════════ */}
-      <section className="py-20 md:py-28 px-6 md:px-10 lg:px-[8vw]">
-        <ScrollFade>
-          <div className="text-center mb-14">
-            <SectionEyebrow>FROM THE SISTERS</SectionEyebrow>
-            <h2 className="font-serif text-[32px] md:text-[42px] font-medium leading-[1.15] text-way-text">
-              This is what belonging feels like.
-            </h2>
-          </div>
-        </ScrollFade>
+      <section className="w-full py-24 px-6" style={{ backgroundColor: waitlistSectionColors.base }}>
+        <div className="max-w-[480px] mx-auto text-center">
+          <p
+            className="mb-6"
+            style={{
+              fontFamily: '"DM Sans", system-ui, sans-serif',
+              fontSize: "11px",
+              fontWeight: 500,
+              letterSpacing: "0.2em",
+              textTransform: "uppercase",
+              color: waitlistSectionColors.sage,
+            }}
+          >
+            FROM THE WAITING ROOM
+          </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-          {testimonials.map((t, i) => (
-            <ScrollFade key={i} className={`animate-delay-${i + 1}`}>
-              <div className="rounded-2xl p-8 h-full flex flex-col" style={{ backgroundColor: "#F2F0EB" }}>
-                <div className="flex-1">
-                  <p className="font-serif italic text-[22px] md:text-[24px] text-way-text leading-[1.45] mb-6">
-                    &ldquo;{t.quote}&rdquo;
-                  </p>
-                </div>
-                <div className="flex items-center gap-3 pt-5 border-t border-way-border">
-                  <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
-                    <img src={t.image} alt={t.name} className="w-full h-full object-cover" />
-                  </div>
-                  <div>
-                    <p className="font-sans text-sm font-medium text-way-text">{t.name}</p>
-                    <p className="font-sans text-xs text-way-gray">{t.role}</p>
-                  </div>
-                </div>
-              </div>
-            </ScrollFade>
-          ))}
+          {waitlistCount === 0 ? (
+            <p
+              className="text-[56px] md:text-[72px] leading-none mb-6"
+              style={{
+                fontFamily: '"Cormorant Garamond", Georgia, serif',
+                fontStyle: "italic",
+                fontWeight: 300,
+                color: waitlistSectionColors.text,
+              }}
+            >
+              Be the first to join
+            </p>
+          ) : (
+            <p
+              className="text-[56px] md:text-[72px] leading-none mb-6 tabular-nums"
+              style={{
+                fontFamily: '"Cormorant Garamond", Georgia, serif',
+                fontWeight: 300,
+                color: waitlistSectionColors.text,
+              }}
+            >
+              {waitlistCount === null ? "—" : waitlistCount.toLocaleString()}
+            </p>
+          )}
+
+          <p
+            className="mb-4"
+            style={{
+              fontFamily: '"DM Sans", system-ui, sans-serif',
+              fontSize: "18px",
+              color: waitlistSectionColors.text,
+            }}
+          >
+            {waitlistCount === 1
+              ? "woman has already added her name."
+              : "women have already added their name."}
+          </p>
+
+          <p
+            style={{
+              fontFamily: '"DM Sans", system-ui, sans-serif',
+              fontSize: "15px",
+              fontStyle: "italic",
+              color: waitlistSectionColors.mutedItalic,
+            }}
+          >
+            They are waiting for the same thing you are.
+          </p>
+        </div>
+      </section>
+
+      <section className="w-full py-24 px-6" style={{ backgroundColor: waitlistSectionColors.surface }}>
+        <div className="max-w-[560px] mx-auto text-center">
+          <p
+            style={{
+              fontFamily: '"DM Sans", system-ui, sans-serif',
+              fontSize: "11px",
+              fontWeight: 500,
+              letterSpacing: "0.2em",
+              textTransform: "uppercase",
+              color: waitlistSectionColors.sage,
+              marginBottom: "32px",
+            }}
+          >
+            WHAT THE WORD SAYS ABOUT COMMUNITY
+          </p>
+
+          <p
+            className="text-[24px] md:text-[32px] leading-[1.6]"
+            style={{
+              fontFamily: '"Cormorant Garamond", Georgia, serif',
+              fontStyle: "italic",
+              color: waitlistSectionColors.text,
+            }}
+          >
+            Two are better than one, because they have a good return for their labor: If either of them
+            falls down, one can help the other up.
+          </p>
+
+          <div
+            className="mx-auto"
+            style={{
+              width: "48px",
+              height: "1px",
+              backgroundColor: waitlistSectionColors.rose,
+              marginTop: "24px",
+              marginBottom: "24px",
+            }}
+            aria-hidden
+          />
+
+          <p
+            style={{
+              fontFamily: '"DM Sans", system-ui, sans-serif',
+              fontSize: "13px",
+              fontWeight: 500,
+              letterSpacing: "0.15em",
+              textTransform: "uppercase",
+              color: waitlistSectionColors.sage,
+            }}
+          >
+            ECCLESIASTES 4:9–10
+          </p>
         </div>
       </section>
 
