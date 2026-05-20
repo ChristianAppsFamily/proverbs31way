@@ -648,7 +648,7 @@ export default function LandingV1() {
                 Join
               </button>
               <a
-                href="mailto:hello@proverbs31way.com"
+                href="mailto:christianappempire@gmail.com"
                 className="eyebrow hover:text-way-rose transition-colors"
               >
                 Contact
