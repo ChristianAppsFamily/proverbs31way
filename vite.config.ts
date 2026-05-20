@@ -6,10 +6,13 @@ import { defineConfig } from "vite"
 import { inspectAttr } from 'kimi-plugin-inspect-react'
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [
-    devServer({ entry: "api/boot.ts", exclude: [/^\/(?!api\/).*$/] }),
-    inspectAttr(), react()],
+    mode === "development" &&
+      devServer({ entry: "api/boot.ts", exclude: [/^\/(?!api\/).*$/] }),
+    mode === "development" && inspectAttr(),
+    react(),
+  ].filter(Boolean),
   server: {
     port: 3000,
   },
@@ -26,4 +29,4 @@ export default defineConfig({
     outDir: path.resolve(__dirname, "dist/public"),
     emptyOutDir: true,
   },
-});
+}));
