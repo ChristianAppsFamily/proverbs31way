@@ -500,8 +500,8 @@ export default function LandingV1() {
           </div>
           <ScrollFade className="animate-delay-2">
             <img
-              src="/images/v1-warm.jpg"
-              alt="Warm smiling woman"
+              src="/images/v1-founding-sister.jpg"
+              alt="Smiling woman in a white shirt on a couch with camera and laptop, warm creative workspace"
               className="w-full h-[420px] md:h-[520px] object-cover rounded-2xl shadow-card"
             />
           </ScrollFade>
