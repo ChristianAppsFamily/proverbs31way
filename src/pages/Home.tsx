@@ -461,21 +461,16 @@ export default function HomePage() {
   const [waitlistCount, setWaitlistCount] = useState<number | null>(null);
 
   const refreshWaitlistCount = useCallback(async () => {
-    const client = supabaseBrowser;
-    if (!client) return;
-    const { count, error } = await client
+    const { count, error } = await supabaseBrowser
       .from("waitlist")
       .select("*", { count: "exact", head: true });
     if (!error) setWaitlistCount(count ?? 0);
   }, []);
 
   useEffect(() => {
-    const client = supabaseBrowser;
-    if (!client) return;
-
     void refreshWaitlistCount();
 
-    const channel = client
+    const channel = supabaseBrowser
       .channel("waitlist-home-count")
       .on(
         "postgres_changes",
@@ -487,7 +482,7 @@ export default function HomePage() {
       .subscribe();
 
     return () => {
-      client.removeChannel(channel);
+      supabaseBrowser.removeChannel(channel);
     };
   }, [refreshWaitlistCount]);
 

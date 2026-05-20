@@ -109,21 +109,16 @@ export default function LandingV1() {
   const [waitlistCount, setWaitlistCount] = useState<number | null>(null);
 
   const refreshWaitlistCount = useCallback(async () => {
-    const client = supabaseBrowser;
-    if (!client) return;
-    const { count, error } = await client
+    const { count, error } = await supabaseBrowser
       .from("waitlist")
       .select("*", { count: "exact", head: true });
     if (!error) setWaitlistCount(count ?? 0);
   }, []);
 
   useEffect(() => {
-    const client = supabaseBrowser;
-    if (!client) return;
-
     void refreshWaitlistCount();
 
-    const channel = client
+    const channel = supabaseBrowser
       .channel("waitlist-landing-count")
       .on(
         "postgres_changes",
@@ -135,7 +130,7 @@ export default function LandingV1() {
       .subscribe();
 
     return () => {
-      client.removeChannel(channel);
+      supabaseBrowser.removeChannel(channel);
     };
   }, [refreshWaitlistCount]);
 
@@ -143,14 +138,6 @@ export default function LandingV1() {
     e.preventDefault();
     const trimmed = email.trim();
     if (!trimmed || waitlistStatus === "loading") return;
-
-    if (!supabaseBrowser) {
-      setWaitlistStatus("error");
-      setWaitlistError(
-        "Waitlist signup is not configured. Please try again later.",
-      );
-      return;
-    }
 
     setWaitlistStatus("loading");
     setWaitlistError("");

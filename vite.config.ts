@@ -25,6 +25,7 @@ export default defineConfig(({ mode }) => ({
     },
   },
   envDir: path.resolve(__dirname),
+  envPrefix: ["VITE_", "NEXT_PUBLIC_"],
   build: {
     outDir: path.resolve(__dirname, "dist/public"),
     emptyOutDir: true,
