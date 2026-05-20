@@ -258,7 +258,7 @@ export default function LandingV1() {
             </ScrollFade>
             <ScrollFade className="animate-delay-1">
               <h2 className="font-serif text-[32px] md:text-[42px] font-medium leading-[1.15] text-way-text mb-6">
-                Faith can feel like the loneliest thing in the world.
+                Walking in faith can sometimes feel like you're the only one.
               </h2>
             </ScrollFade>
             <ScrollFade className="animate-delay-2">
