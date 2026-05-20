@@ -293,8 +293,8 @@ export default function LandingV1() {
           <ScrollFade className="animate-delay-2">
             <div className="relative">
               <img
-                src="/images/v1-reading.jpg"
-                alt="Woman reading"
+                src="/images/v1-why-built.jpg"
+                alt="Woman reading Scripture outdoors on a rock in a sunlit meadow"
                 className="w-full h-[420px] md:h-[520px] object-cover rounded-2xl shadow-card"
               />
               <div className="absolute -bottom-5 -left-5 bg-way-surface rounded-xl p-5 shadow-warm max-w-[240px]">
