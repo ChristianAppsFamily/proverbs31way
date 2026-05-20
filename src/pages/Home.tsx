@@ -1,7 +1,8 @@
-import { useEffect, useRef, useLayoutEffect, useState, type MouseEvent } from 'react';
+import { useCallback, useEffect, useRef, useLayoutEffect, useState, type MouseEvent } from 'react';
 import { Link } from 'react-router';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { supabaseBrowser } from '@/lib/supabaseBrowser';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -99,7 +100,7 @@ function Navigation() {
   );
 }
 
-function HeroSection() {
+function HeroSection({ waitlistCount }: { waitlistCount: number | null }) {
   const sectionRef = useRef<HTMLElement>(null);
   const headlineRef = useRef<HTMLDivElement>(null);
   const verseCardRef = useRef<HTMLDivElement>(null);
@@ -161,7 +162,12 @@ function HeroSection() {
               Step inside <span className="ml-1.5 group-hover:translate-x-1 transition-transform">&rarr;</span>
             </Link>
           </div>
-          <p className="hero-micro font-sans text-xs text-way-gray/70 mb-8">2,847 sisters are already waiting.</p>
+          <p className="hero-micro font-sans text-xs text-way-gray/70 mb-8">
+            <span className="font-medium text-way-text tabular-nums">
+              {waitlistCount === null ? "—" : waitlistCount.toLocaleString()}
+            </span>{" "}
+            sisters are already waiting.
+          </p>
           <div ref={verseCardRef} className="lg:hidden bg-way-surface rounded-xl shadow-card shadow-inset-verse p-6 will-change-transform">
             <p className="verse-text text-lg mb-4">&ldquo;Let the morning bring me word of your unfailing love, for I have put my trust in you. Show me the way I should go, for to you I entrust my life.&rdquo;</p>
             <p className="eyebrow text-way-sage mb-5">Psalm 143:8</p>
@@ -265,7 +271,7 @@ function FiveRoomsSection() {
   );
 }
 
-function WaitlistSection() {
+function WaitlistSection({ waitlistCount }: { waitlistCount: number | null }) {
   const sectionRef = useRef<HTMLElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const leftRef = useRef<HTMLDivElement>(null);
@@ -302,7 +308,12 @@ function WaitlistSection() {
               <input type="email" placeholder="Enter your email" className="w-full sm:flex-1 px-5 py-3 rounded-lg bg-way-white border border-way-border font-sans text-sm text-way-text placeholder:text-way-gray/60 focus:outline-none focus:border-way-rose focus:ring-1 focus:ring-way-rose/20 transition-all" />
               <button className="btn-pill-primary w-full sm:w-auto whitespace-nowrap">Notify Me</button>
             </div>
-            <p className="font-sans text-sm text-way-sage mb-3">2,847 women are already waiting.</p>
+            <p className="font-sans text-sm text-way-sage mb-3">
+              <span className="font-medium text-way-text tabular-nums">
+                {waitlistCount === null ? "—" : waitlistCount.toLocaleString()}
+              </span>{" "}
+              women are already waiting.
+            </p>
             <p className="verse-text text-sm text-way-gray/80">&ldquo;She perceives that her merchandise is profitable.&rdquo; &mdash; Proverbs 31:18</p>
           </div>
           <div ref={rightRef} className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-0 relative">
@@ -447,6 +458,39 @@ function Footer() {
 /* ───────────────────── Home Page ───────────────────── */
 
 export default function HomePage() {
+  const [waitlistCount, setWaitlistCount] = useState<number | null>(null);
+
+  const refreshWaitlistCount = useCallback(async () => {
+    const client = supabaseBrowser;
+    if (!client) return;
+    const { count, error } = await client
+      .from("waitlist")
+      .select("*", { count: "exact", head: true });
+    if (!error) setWaitlistCount(count ?? 0);
+  }, []);
+
+  useEffect(() => {
+    const client = supabaseBrowser;
+    if (!client) return;
+
+    void refreshWaitlistCount();
+
+    const channel = client
+      .channel("waitlist-home-count")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "waitlist" },
+        () => {
+          void refreshWaitlistCount();
+        },
+      )
+      .subscribe();
+
+    return () => {
+      client.removeChannel(channel);
+    };
+  }, [refreshWaitlistCount]);
+
   useEffect(() => {
     const setupSnap = () => {
       const pinned = ScrollTrigger.getAll().filter((st) => st.vars.pin).sort((a, b) => a.start - b.start);
@@ -477,9 +521,9 @@ export default function HomePage() {
     <div className="relative">
       <Navigation />
       <main className="relative">
-        <HeroSection />
+        <HeroSection waitlistCount={waitlistCount} />
         <FiveRoomsSection />
-        <WaitlistSection />
+        <WaitlistSection waitlistCount={waitlistCount} />
         <QuoteSection />
         <Footer />
       </main>

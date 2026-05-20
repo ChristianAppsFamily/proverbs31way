@@ -4,7 +4,7 @@
  * No product feature demos. Only emotion, aspiration, and belonging.
  */
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router";
 import { supabaseBrowser } from "@/lib/supabaseBrowser";
 
@@ -19,6 +19,8 @@ const roomsTeaser = [
   { name: "The Letter", desc: "Write your heart. Be deeply known." },
   { name: "The Sanctuary", desc: "Stillness, prayer, and sacred rest." },
 ];
+
+const FOUNDING_SPOTS_TOTAL = 500;
 
 /** Matches app/page waitlist counter + scripture (hex from design spec). */
 const waitlistSectionColors = {
@@ -104,6 +106,38 @@ export default function LandingV1() {
   const [email, setEmail] = useState("");
   const [waitlistStatus, setWaitlistStatus] = useState<WaitlistStatus>("idle");
   const [waitlistError, setWaitlistError] = useState("");
+  const [waitlistCount, setWaitlistCount] = useState<number | null>(null);
+
+  const refreshWaitlistCount = useCallback(async () => {
+    const client = supabaseBrowser;
+    if (!client) return;
+    const { count, error } = await client
+      .from("waitlist")
+      .select("*", { count: "exact", head: true });
+    if (!error) setWaitlistCount(count ?? 0);
+  }, []);
+
+  useEffect(() => {
+    const client = supabaseBrowser;
+    if (!client) return;
+
+    void refreshWaitlistCount();
+
+    const channel = client
+      .channel("waitlist-landing-count")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "waitlist" },
+        () => {
+          void refreshWaitlistCount();
+        },
+      )
+      .subscribe();
+
+    return () => {
+      client.removeChannel(channel);
+    };
+  }, [refreshWaitlistCount]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -148,6 +182,7 @@ export default function LandingV1() {
     }
 
     setWaitlistStatus("success");
+    void refreshWaitlistCount();
   };
 
   return (
@@ -223,7 +258,10 @@ export default function LandingV1() {
                   ))}
                 </div>
                 <p className="font-sans text-sm text-way-gray">
-                  <span className="font-medium text-way-text">2,847</span> sisters already waiting
+                  <span className="font-medium text-way-text tabular-nums">
+                    {waitlistCount === null ? "—" : waitlistCount.toLocaleString()}
+                  </span>{" "}
+                  sisters already waiting
                 </p>
               </div>
             </ScrollFade>
@@ -464,8 +502,11 @@ export default function LandingV1() {
                   <span className="animate-pulse-dot absolute inline-flex h-full w-full rounded-full bg-way-rose opacity-75" />
                   <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-way-rose" />
                 </span>
-                <span className="font-sans text-sm text-way-text">
-                  <span className="font-medium">163</span> of 500 spots claimed
+                <span className="font-sans text-sm text-way-text tabular-nums">
+                  <span className="font-medium">
+                    {waitlistCount === null ? "—" : waitlistCount.toLocaleString()}
+                  </span>{" "}
+                  of {FOUNDING_SPOTS_TOTAL.toLocaleString()} spots claimed
                 </span>
               </div>
             </ScrollFade>
