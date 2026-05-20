@@ -135,7 +135,7 @@ function WaitlistCapture() {
 
 function CommunityScriptureSection() {
   return (
-    <section className="w-full py-24 px-6" style={{ backgroundColor: colors.surface }}>
+    <section className="w-full py-24 px-6" style={{ backgroundColor: "#FFFFFF" }}>
       <div className="max-w-[720px] mx-auto text-center">
         <p
           style={{

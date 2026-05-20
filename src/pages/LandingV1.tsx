@@ -327,7 +327,7 @@ export default function LandingV1() {
       {/* ═══════════════════════════════════════════
           4. SCRIPTURE + COMMUNITY IMAGE (replaces waiting-room counter + testimonials)
           ═══════════════════════════════════════════ */}
-      <section className="w-full py-24 px-6" style={{ backgroundColor: waitlistSectionColors.surface }}>
+      <section className="w-full py-24 px-6" style={{ backgroundColor: "#FFFFFF" }}>
         <div className="max-w-[720px] mx-auto text-center">
           <p
             style={{
