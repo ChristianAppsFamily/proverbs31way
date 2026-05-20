@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useState } from "react";
 import { supabase } from "../lib/supabase";
 
 const colors = {
@@ -12,8 +12,6 @@ const colors = {
   border: "#E2DDD6",
   muted: "#6B6B68",
 } as const;
-
-const mutedItalic = "#7A7A72";
 
 type WaitlistStatus = "idle" | "loading" | "success" | "error";
 
@@ -135,84 +133,10 @@ function WaitlistCapture() {
   );
 }
 
-function WaitlistCounterSection({ count }: { count: number | null }) {
-  const nameLine =
-    count === 1
-      ? "woman has already added her name."
-      : "women have already added their name.";
-
-  return (
-    <section className="w-full py-24 px-6" style={{ backgroundColor: colors.base }}>
-      <div className="max-w-[480px] mx-auto text-center">
-        <p
-          className="mb-6"
-          style={{
-            fontFamily: '"DM Sans", system-ui, sans-serif',
-            fontSize: "11px",
-            fontWeight: 500,
-            letterSpacing: "0.2em",
-            textTransform: "uppercase",
-            color: colors.sage,
-          }}
-        >
-          FROM THE WAITING ROOM
-        </p>
-
-        {count === 0 ? (
-          <p
-            className="text-[56px] md:text-[72px] leading-none mb-6"
-            style={{
-              fontFamily: '"Cormorant Garamond", Georgia, serif',
-              fontStyle: "italic",
-              fontWeight: 300,
-              color: colors.text,
-            }}
-          >
-            Be the first to join
-          </p>
-        ) : (
-          <p
-            className="text-[56px] md:text-[72px] leading-none mb-6 tabular-nums"
-            style={{
-              fontFamily: '"Cormorant Garamond", Georgia, serif',
-              fontWeight: 300,
-              color: colors.text,
-            }}
-          >
-            {count === null ? "—" : count.toLocaleString()}
-          </p>
-        )}
-
-        <p
-          className="mb-4"
-          style={{
-            fontFamily: '"DM Sans", system-ui, sans-serif',
-            fontSize: "18px",
-            color: colors.text,
-          }}
-        >
-          {nameLine}
-        </p>
-
-        <p
-          style={{
-            fontFamily: '"DM Sans", system-ui, sans-serif',
-            fontSize: "15px",
-            fontStyle: "italic",
-            color: mutedItalic,
-          }}
-        >
-          They are waiting for the same thing you are.
-        </p>
-      </div>
-    </section>
-  );
-}
-
-function ScriptureAnchorSection() {
+function CommunityScriptureSection() {
   return (
     <section className="w-full py-24 px-6" style={{ backgroundColor: colors.surface }}>
-      <div className="max-w-[560px] mx-auto text-center">
+      <div className="max-w-[720px] mx-auto text-center">
         <p
           style={{
             fontFamily: '"DM Sans", system-ui, sans-serif',
@@ -226,6 +150,16 @@ function ScriptureAnchorSection() {
         >
           WHAT THE WORD SAYS ABOUT COMMUNITY
         </p>
+
+        <img
+          src="/images/v1-community-ecclesiastes.jpg"
+          alt="Three women sitting closely together on a wooden bench in a tulip field, showing support and community."
+          className="w-full rounded-2xl object-cover shadow-[0_18px_45px_rgba(28,28,26,0.08)] mb-10 max-h-[280px] sm:max-h-[340px] md:max-h-[400px]"
+          width={1024}
+          height={682}
+          loading="lazy"
+          decoding="async"
+        />
 
         <p
           className="text-[24px] md:text-[32px] leading-[1.6]"
@@ -269,34 +203,6 @@ function ScriptureAnchorSection() {
 }
 
 export default function LandingPage() {
-  const [count, setCount] = useState<number | null>(null);
-
-  useEffect(() => {
-    const fetchCount = async () => {
-      const { count } = await supabase
-        .from("waitlist")
-        .select("*", { count: "exact", head: true });
-      setCount(count);
-    };
-
-    fetchCount();
-
-    const channel = supabase
-      .channel("waitlist-count")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "waitlist" },
-        () => {
-          fetchCount();
-        },
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
-
   return (
     <main className="min-h-[100dvh] flex flex-col w-full">
       <section
@@ -335,8 +241,7 @@ export default function LandingPage() {
           <WaitlistCapture />
         </div>
       </section>
-      <WaitlistCounterSection count={count} />
-      <ScriptureAnchorSection />
+      <CommunityScriptureSection />
     </main>
   );
 }

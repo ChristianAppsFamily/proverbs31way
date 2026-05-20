@@ -4,7 +4,7 @@
  * No product feature demos. Only emotion, aspiration, and belonging.
  */
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router";
 import { supabaseBrowser } from "@/lib/supabaseBrowser";
 
@@ -104,36 +104,6 @@ export default function LandingV1() {
   const [email, setEmail] = useState("");
   const [waitlistStatus, setWaitlistStatus] = useState<WaitlistStatus>("idle");
   const [waitlistError, setWaitlistError] = useState("");
-  const [waitlistCount, setWaitlistCount] = useState<number | null>(null);
-
-  useEffect(() => {
-    const client = supabaseBrowser;
-    if (!client) return;
-
-    const fetchCount = async () => {
-      const { count } = await client
-        .from("waitlist")
-        .select("*", { count: "exact", head: true });
-      setWaitlistCount(count);
-    };
-
-    fetchCount();
-
-    const channel = client
-      .channel("waitlist-count-landing")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "waitlist" },
-        () => {
-          fetchCount();
-        },
-      )
-      .subscribe();
-
-    return () => {
-      client.removeChannel(channel);
-    };
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -355,77 +325,10 @@ export default function LandingV1() {
       </section>
 
       {/* ═══════════════════════════════════════════
-          4. WAITLIST COUNTER + SCRIPTURE (replaces testimonials)
+          4. SCRIPTURE + COMMUNITY IMAGE (replaces waiting-room counter + testimonials)
           ═══════════════════════════════════════════ */}
-      <section className="w-full py-24 px-6" style={{ backgroundColor: waitlistSectionColors.base }}>
-        <div className="max-w-[480px] mx-auto text-center">
-          <p
-            className="mb-6"
-            style={{
-              fontFamily: '"DM Sans", system-ui, sans-serif',
-              fontSize: "11px",
-              fontWeight: 500,
-              letterSpacing: "0.2em",
-              textTransform: "uppercase",
-              color: waitlistSectionColors.sage,
-            }}
-          >
-            FROM THE WAITING ROOM
-          </p>
-
-          {waitlistCount === 0 ? (
-            <p
-              className="text-[56px] md:text-[72px] leading-none mb-6"
-              style={{
-                fontFamily: '"Cormorant Garamond", Georgia, serif',
-                fontStyle: "italic",
-                fontWeight: 300,
-                color: waitlistSectionColors.text,
-              }}
-            >
-              Be the first to join
-            </p>
-          ) : (
-            <p
-              className="text-[56px] md:text-[72px] leading-none mb-6 tabular-nums"
-              style={{
-                fontFamily: '"Cormorant Garamond", Georgia, serif',
-                fontWeight: 300,
-                color: waitlistSectionColors.text,
-              }}
-            >
-              {waitlistCount === null ? "—" : waitlistCount.toLocaleString()}
-            </p>
-          )}
-
-          <p
-            className="mb-4"
-            style={{
-              fontFamily: '"DM Sans", system-ui, sans-serif',
-              fontSize: "18px",
-              color: waitlistSectionColors.text,
-            }}
-          >
-            {waitlistCount === 1
-              ? "woman has already added her name."
-              : "women have already added their name."}
-          </p>
-
-          <p
-            style={{
-              fontFamily: '"DM Sans", system-ui, sans-serif',
-              fontSize: "15px",
-              fontStyle: "italic",
-              color: waitlistSectionColors.mutedItalic,
-            }}
-          >
-            They are waiting for the same thing you are.
-          </p>
-        </div>
-      </section>
-
       <section className="w-full py-24 px-6" style={{ backgroundColor: waitlistSectionColors.surface }}>
-        <div className="max-w-[560px] mx-auto text-center">
+        <div className="max-w-[720px] mx-auto text-center">
           <p
             style={{
               fontFamily: '"DM Sans", system-ui, sans-serif',
@@ -439,6 +342,16 @@ export default function LandingV1() {
           >
             WHAT THE WORD SAYS ABOUT COMMUNITY
           </p>
+
+          <img
+            src="/images/v1-community-ecclesiastes.jpg"
+            alt="Three women sitting closely together on a wooden bench in a tulip field, showing support and community."
+            className="w-full rounded-2xl object-cover shadow-[0_18px_45px_rgba(28,28,26,0.08)] mb-10 max-h-[280px] sm:max-h-[340px] md:max-h-[400px]"
+            width={1024}
+            height={682}
+            loading="lazy"
+            decoding="async"
+          />
 
           <p
             className="text-[24px] md:text-[32px] leading-[1.6]"
