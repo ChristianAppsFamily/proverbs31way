@@ -8,7 +8,7 @@
  *   4. Right sidebar: "Sisters in conversation" comment feed
  */
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Link, useNavigate } from "react-router";
 import { trpc } from "@/providers/trpc";
 import { useAuth } from "@/hooks/useAuth";
@@ -144,8 +144,10 @@ function CommentBubble({ name, body, time }: { name: string; body: string; time:
 /** Comment sidebar content — shared by desktop right sidebar and mobile */
 function SistersPanel({
   roomSlug,
+  onJoinWaitlist,
 }: {
   roomSlug: string;
+  onJoinWaitlist: () => void;
 }) {
   const { isAuthenticated } = useAuth();
   const [commentText, setCommentText] = useState("");
@@ -221,9 +223,13 @@ function SistersPanel({
         ) : (
           <div className="text-center py-2">
             <p className="font-sans text-sm text-way-gray mb-2">Join the conversation</p>
-            <Link to="/login" className="font-sans text-sm font-medium text-way-rose hover:opacity-80 transition-opacity">
+            <button
+              type="button"
+              onClick={onJoinWaitlist}
+              className="font-sans text-sm font-medium text-way-rose hover:opacity-80 transition-opacity bg-transparent border-0 cursor-pointer p-0"
+            >
               Sign in to share &rarr;
-            </Link>
+            </button>
           </div>
         )}
       </div>
@@ -269,6 +275,16 @@ export default function RoomLayout({ roomName, roomSlug, children }: RoomLayoutP
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
 
+  const goToWaitlist = useCallback(() => {
+    navigate("/");
+    window.setTimeout(() => {
+      document.getElementById("waitlist")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 150);
+  }, [navigate]);
+
   /* ── Nav to garden with date ── */
   const handleDateClick = (dateStr: string) => {
     setSelectedDate(dateStr);
@@ -296,7 +312,9 @@ export default function RoomLayout({ roomName, roomSlug, children }: RoomLayoutP
                 {user.name?.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase() || "Me"}
               </div>
             ) : (
-              <Link to="/login" className="btn-pill-primary text-xs py-1.5 px-4">Sign In</Link>
+              <button type="button" onClick={goToWaitlist} className="btn-pill-primary text-xs py-1.5 px-4">
+                Sign In
+              </button>
             )}
           </div>
         </div>
@@ -407,7 +425,7 @@ export default function RoomLayout({ roomName, roomSlug, children }: RoomLayoutP
 
             {/* Mobile: Sisters Panel */}
             <div className="lg:hidden mt-12 pt-8 border-t border-[#E8E2DA]">
-              <SistersPanel roomSlug={roomSlug} />
+              <SistersPanel roomSlug={roomSlug} onJoinWaitlist={goToWaitlist} />
             </div>
           </div>
         </main>
@@ -417,7 +435,7 @@ export default function RoomLayout({ roomName, roomSlug, children }: RoomLayoutP
           className="hidden lg:flex w-[280px] flex-shrink-0 sticky top-[61px] h-[calc(100dvh-61px)] flex-col"
           style={{ backgroundColor: "#F5F2ED", borderLeft: "1px solid #E8E2DA" }}
         >
-          <SistersPanel roomSlug={roomSlug} />
+          <SistersPanel roomSlug={roomSlug} onJoinWaitlist={goToWaitlist} />
         </aside>
       </div>
     </div>
