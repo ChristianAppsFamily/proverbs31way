@@ -4,6 +4,8 @@
  *
  * Edge function HTML mirror: supabase/functions/join-waitlist/index.ts
  * (getConfirmationEmailHtml)
+ *
+ * Note: The hero quote is fixed Proverbs 31:20. There is no weekly-verse drip in code yet.
  */
 
 export const WAITLIST_CONFIRMATION_SUBJECT = "You are on the list, sister.";
@@ -185,7 +187,7 @@ export default function WaitlistConfirmation() {
                             color: "#1C1C1A",
                           }}
                         >
-                          While you wait, we will send you a verse each week to carry with you.
+                          While you wait, we will email you from time to time with updates and encouragement.
                         </p>
                         <p
                           style={{
@@ -262,7 +264,7 @@ export default function WaitlistConfirmation() {
                             textAlign: "center",
                           }}
                         >
-                          Proverbs31Way.com · Christian App Empire LLC
+                          Proverbs31Way.com, Christian App Empire LLC
                         </p>
                         <p
                           style={{

@@ -52,7 +52,7 @@ function getConfirmationEmailHtml(_email: string): string {
               <p style="margin:0 0 20px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.8;color:#1C1C1A;">Sister,</p>
               <p style="margin:0 0 20px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.8;color:#1C1C1A;">You are on the list.</p>
               <p style="margin:0 0 20px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.8;color:#1C1C1A;">The doors to The Way are not open yet, but when they are, you will be the first inside. Founding Sisters receive lifetime recognition inside the community.</p>
-              <p style="margin:0 0 20px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.8;color:#1C1C1A;">While you wait, we will send you a verse each week to carry with you.</p>
+              <p style="margin:0 0 20px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.8;color:#1C1C1A;">While you wait, we will email you from time to time with updates and encouragement.</p>
               <p style="margin:0 0 20px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.8;color:#1C1C1A;">The journey begins soon.</p>
               <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.8;color:#1C1C1A;">With love,<br />The Way</p>
             </td>
@@ -69,7 +69,7 @@ function getConfirmationEmailHtml(_email: string): string {
           </tr>
           <tr>
             <td align="center">
-              <p style="margin:0 0 8px 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.6;color:#7A7A72;text-align:center;">Proverbs31Way.com · Christian App Empire LLC</p>
+              <p style="margin:0 0 8px 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.6;color:#7A7A72;text-align:center;">Proverbs31Way.com, Christian App Empire LLC</p>
               <p style="margin:0 0 12px 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.6;color:#7A7A72;text-align:center;">You received this because you joined our waitlist.</p>
               <p style="margin:0;text-align:center;">
                 <a href="https://proverbs31way.com/unsubscribe" style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#6B9E8F;text-decoration:underline;">Unsubscribe</a>
