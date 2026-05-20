@@ -227,7 +227,7 @@ export default function LandingPage() {
               color: colors.text,
             }}
           >
-            Your sisters are waiting.
+            The Way - A Home For The Daughters of God
           </h1>
           <p
             className="text-lg mb-10 max-w-md mx-auto"
