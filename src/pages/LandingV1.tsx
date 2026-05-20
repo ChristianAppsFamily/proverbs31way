@@ -6,6 +6,7 @@
 
 import { useState } from "react";
 import { Link } from "react-router";
+import { supabaseBrowser } from "@/lib/supabaseBrowser";
 
 /* ═══════════════════════════════════════════
    Data
@@ -69,17 +70,26 @@ function ArrowDownIcon() {
 }
 
 /* ═══════════════════════════════════════════
-   Reusable Components
+   HashRouter: plain #anchors replace the whole hash and break #/ routes.
+   Use programmatic scroll instead of href="#waitlist".
    ═══════════════════════════════════════════ */
+
+function scrollToSection(id: string) {
+  document.getElementById(id)?.scrollIntoView({
+    behavior: "smooth",
+    block: "start",
+  });
+}
 
 function CTAButton({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
-    <a
-      href="#waitlist"
+    <button
+      type="button"
+      onClick={() => scrollToSection("waitlist")}
       className={`inline-flex items-center justify-center px-8 py-4 rounded-pill font-sans text-base font-medium transition-all duration-200 shadow-warm hover:shadow-card hover:-translate-y-0.5 ${className}`}
     >
       {children}
-    </a>
+    </button>
   );
 }
 
@@ -99,14 +109,56 @@ function ScrollFade({ children, className = "" }: { children: React.ReactNode; c
    Main Page
    ═══════════════════════════════════════════ */
 
+type WaitlistStatus = "idle" | "loading" | "success" | "error";
+
 export default function LandingV1() {
   const [email, setEmail] = useState("");
-  const [submitted, setSubmitted] = useState(false);
+  const [waitlistStatus, setWaitlistStatus] = useState<WaitlistStatus>("idle");
+  const [waitlistError, setWaitlistError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim()) return;
-    setSubmitted(true);
+    const trimmed = email.trim();
+    if (!trimmed || waitlistStatus === "loading") return;
+
+    if (!supabaseBrowser) {
+      setWaitlistStatus("error");
+      setWaitlistError(
+        "Waitlist signup is not configured. Please try again later.",
+      );
+      return;
+    }
+
+    setWaitlistStatus("loading");
+    setWaitlistError("");
+
+    const { data, error } = await supabaseBrowser.functions.invoke(
+      "join-waitlist",
+      { body: { email: trimmed } },
+    );
+
+    if (error) {
+      setWaitlistStatus("error");
+      setWaitlistError(
+        error.message || "Something went wrong. Please try again.",
+      );
+      return;
+    }
+
+    const payload = data as { success?: boolean; error?: string } | null;
+    if (payload?.error) {
+      setWaitlistStatus("error");
+      setWaitlistError(payload.error);
+      return;
+    }
+
+    if (!payload?.success) {
+      setWaitlistStatus("error");
+      setWaitlistError("Something went wrong. Please try again.");
+      return;
+    }
+
+    setWaitlistStatus("success");
   };
 
   return (
@@ -428,36 +480,49 @@ export default function LandingV1() {
           </ScrollFade>
 
           <ScrollFade className="animate-delay-3">
-            {!submitted ? (
-              <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row items-center justify-center gap-3 max-w-md mx-auto">
+            {waitlistStatus === "success" ? (
+              <p
+                className="max-w-md mx-auto text-xl md:text-2xl leading-relaxed"
+                style={{
+                  fontFamily: '"Cormorant Garamond", Georgia, serif',
+                  fontStyle: "italic",
+                  color: "#1C1C1A",
+                }}
+              >
+                You are on the list, sister. We will see you soon.
+              </p>
+            ) : (
+              <form
+                onSubmit={handleSubmit}
+                className="flex flex-col sm:flex-row items-center justify-center gap-3 max-w-md mx-auto"
+              >
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="your@email.com"
                   required
-                  className="w-full sm:flex-1 px-6 py-4 rounded-pill bg-way-white border border-way-border font-sans text-base text-way-text placeholder:text-way-gray/50 focus:outline-none focus:border-way-rose focus:ring-2 focus:ring-way-rose/10 transition-all"
+                  disabled={waitlistStatus === "loading"}
+                  autoComplete="email"
+                  className="w-full sm:flex-1 px-6 py-4 rounded-pill bg-way-white border border-way-border font-sans text-base text-way-text placeholder:text-way-gray/50 focus:outline-none focus:border-way-rose focus:ring-2 focus:ring-way-rose/10 transition-all disabled:opacity-60"
                 />
                 <button
                   type="submit"
-                  className="w-full sm:w-auto btn-pill-primary px-8 py-4 text-base whitespace-nowrap shadow-warm hover:shadow-card"
+                  disabled={waitlistStatus === "loading"}
+                  className="w-full sm:w-auto btn-pill-primary px-8 py-4 text-base whitespace-nowrap shadow-warm hover:shadow-card disabled:opacity-75 disabled:cursor-not-allowed"
                 >
-                  Join the Waitlist
+                  {waitlistStatus === "loading" ? "Joining..." : "Join the Waitlist"}
                 </button>
               </form>
-            ) : (
-              <div className="rounded-2xl p-8 max-w-md mx-auto" style={{ backgroundColor: "#FAFAF8" }}>
-                <div className="w-12 h-12 rounded-full bg-way-sage/10 flex items-center justify-center mx-auto mb-4">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6B9E8F" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M20 6 9 17l-5-5" />
-                  </svg>
-                </div>
-                <p className="font-serif text-xl font-medium text-way-text mb-2">Welcome, Sister.</p>
-                <p className="font-sans text-sm text-way-gray">
-                  You're #{2848} on the list. We'll be in touch when the doors open.
-                </p>
-              </div>
             )}
+            {waitlistStatus === "error" && waitlistError ? (
+              <p
+                className="mt-4 max-w-md mx-auto text-sm text-way-gray"
+                role="alert"
+              >
+                {waitlistError}
+              </p>
+            ) : null}
           </ScrollFade>
 
           <ScrollFade className="animate-delay-4">
@@ -484,7 +549,16 @@ export default function LandingV1() {
             </div>
             <div className="flex items-center gap-6">
               {["About", "Rooms", "Join", "Contact"].map((link) => (
-                <a key={link} href={link === "Join" ? "#waitlist" : `#${link.toLowerCase()}`} className="eyebrow hover:text-way-rose transition-colors">
+                <a
+                  key={link}
+                  href="#/"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (link === "Join") scrollToSection("waitlist");
+                    else scrollToSection(link.toLowerCase());
+                  }}
+                  className="eyebrow hover:text-way-rose transition-colors"
+                >
                   {link}
                 </a>
               ))}

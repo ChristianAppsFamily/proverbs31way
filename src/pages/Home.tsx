@@ -1,9 +1,18 @@
-import { useEffect, useRef, useLayoutEffect, useState } from 'react';
+import { useEffect, useRef, useLayoutEffect, useState, type MouseEvent } from 'react';
 import { Link } from 'react-router';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
+
+function scrollToWaitlistAnchor(e: MouseEvent<HTMLAnchorElement>) {
+  e.preventDefault();
+  document.getElementById('waitlist')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function scrollToWaitlist() {
+  document.getElementById('waitlist')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
 
 /* ───────────────────── Data ───────────────────── */
 
@@ -74,20 +83,17 @@ function Navigation() {
           <a href="#rooms" className="eyebrow hover:text-way-rose transition-colors">
             Rooms
           </a>
-          <a href="#waitlist" className="eyebrow hover:text-way-rose transition-colors">
+          <a href="#/" onClick={scrollToWaitlistAnchor} className="eyebrow hover:text-way-rose transition-colors">
             Join
           </a>
-          <a
-            href="#waitlist"
-            className="btn-pill-primary text-xs py-2.5 px-5"
-          >
+          <button type="button" onClick={scrollToWaitlist} className="btn-pill-primary text-xs py-2.5 px-5">
             Start Free Trial
-          </a>
+          </button>
         </div>
 
-        <a href="#waitlist" className="md:hidden btn-pill-primary text-xs py-2 px-4">
+        <button type="button" onClick={scrollToWaitlist} className="md:hidden btn-pill-primary text-xs py-2 px-4">
           Join
-        </a>
+        </button>
       </div>
     </nav>
   );
@@ -148,7 +154,9 @@ function HeroSection() {
             Daily scripture. Real conversation. Five rooms for the Proverbs 31 woman.
           </p>
           <div className="hero-ctas flex flex-wrap items-center gap-4 mb-5">
-            <a href="#waitlist" className="btn-pill-primary">Join the Waitlist</a>
+            <button type="button" onClick={scrollToWaitlist} className="btn-pill-primary">
+              Join the Waitlist
+            </button>
             <Link to="/garden" className="inline-flex items-center font-sans text-sm font-medium text-way-sage hover:text-way-rose transition-colors group">
               Step inside <span className="ml-1.5 group-hover:translate-x-1 transition-transform">&rarr;</span>
             </Link>
@@ -407,9 +415,22 @@ function Footer() {
             <p className="font-sans text-xs text-way-gray">Daily scripture. Real conversation.</p>
           </div>
           <div className="flex items-center gap-6 md:gap-8">
-            {['About', 'Rooms', 'Join', 'Contact'].map((link) => (
-              <a key={link} href={`#${link.toLowerCase()}`} className="eyebrow hover:text-way-rose transition-colors">{link}</a>
-            ))}
+            {['About', 'Rooms', 'Join', 'Contact'].map((link) =>
+              link === 'Join' ? (
+                <a
+                  key={link}
+                  href="#/"
+                  onClick={scrollToWaitlistAnchor}
+                  className="eyebrow hover:text-way-rose transition-colors"
+                >
+                  {link}
+                </a>
+              ) : (
+                <a key={link} href={`#${link.toLowerCase()}`} className="eyebrow hover:text-way-rose transition-colors">
+                  {link}
+                </a>
+              ),
+            )}
           </div>
           <div className="footer-tagline">
             <p className="verse-text text-sm text-way-gray">For the woman who fears the Lord.</p>

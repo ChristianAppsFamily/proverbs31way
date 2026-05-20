@@ -14,3 +14,12 @@
 npm install
 npm run dev
 ```
+
+### Waitlist (Vite landing)
+
+The marketing site calls `join-waitlist` using the browser Supabase client. Set in **`.env.local`** (and in **Vercel → Environment Variables** for production builds):
+
+- `VITE_SUPABASE_URL` — e.g. `https://<project-ref>.supabase.co`
+- `VITE_SUPABASE_ANON_KEY` — Dashboard → Settings → API → **anon public** key
+
+Vite only exposes variables prefixed with `VITE_`. Redeploy on Vercel after adding or changing these.

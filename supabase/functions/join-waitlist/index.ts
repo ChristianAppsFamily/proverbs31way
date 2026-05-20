@@ -8,6 +8,82 @@ const corsHeaders = {
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+/** Inline HTML mirror of emails/WaitlistConfirmation.tsx */
+function getConfirmationEmailHtml(_email: string): string {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>You are on the list, sister.</title>
+</head>
+<body style="margin:0;padding:0;background-color:#FAFAF8;font-family:Arial,Helvetica,sans-serif;">
+  <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin:0;padding:0;background-color:#FAFAF8;border-collapse:collapse;">
+    <tr>
+      <td align="center" style="padding:40px 16px;">
+        <table role="presentation" cellpadding="0" cellspacing="0" width="600" style="max-width:600px;width:100%;border-collapse:collapse;">
+          <tr>
+            <td align="center" style="padding-bottom:12px;">
+              <p style="margin:0;font-family:Georgia,'Times New Roman',serif;font-size:18px;font-weight:500;color:#D4847A;letter-spacing:0.02em;">The Way | P31</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding-bottom:32px;">
+              <div style="height:1px;background-color:#D4847A;line-height:1px;font-size:1px;">&nbsp;</div>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" style="padding-bottom:12px;">
+              <p style="margin:0;font-family:Georgia,'Times New Roman',serif;font-size:24px;font-style:italic;line-height:1.45;color:#1C1C1A;text-align:center;">She opens her arms to the poor and extends her hands to the needy.</p>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" style="padding-bottom:28px;">
+              <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:#6B9E8F;">PROVERBS 31:20</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding-bottom:28px;">
+              <div style="height:1px;background-color:#E2DDD6;line-height:1px;font-size:1px;">&nbsp;</div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding-bottom:28px;">
+              <p style="margin:0 0 20px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.8;color:#1C1C1A;">Sister,</p>
+              <p style="margin:0 0 20px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.8;color:#1C1C1A;">You are on the list.</p>
+              <p style="margin:0 0 20px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.8;color:#1C1C1A;">The doors to The Way are not open yet — but when they are, you will be the first inside. Founding Sisters receive lifetime recognition inside the community.</p>
+              <p style="margin:0 0 20px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.8;color:#1C1C1A;">While you wait, we will send you a verse each week to carry with you.</p>
+              <p style="margin:0 0 20px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.8;color:#1C1C1A;">The journey begins soon.</p>
+              <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.8;color:#1C1C1A;">With love,<br />The Way</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding-bottom:24px;">
+              <div style="height:1px;background-color:#E2DDD6;line-height:1px;font-size:1px;">&nbsp;</div>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" style="padding-bottom:36px;">
+              <p style="margin:0;font-family:Georgia,'Times New Roman',serif;font-size:14px;font-style:italic;line-height:1.6;color:#7A7A72;text-align:center;">Know a woman who needs this community? Forward this email to her.</p>
+            </td>
+          </tr>
+          <tr>
+            <td align="center">
+              <p style="margin:0 0 8px 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.6;color:#7A7A72;text-align:center;">Proverbs31Way.com · Christian App Empire LLC</p>
+              <p style="margin:0 0 12px 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.6;color:#7A7A72;text-align:center;">You received this because you joined our waitlist.</p>
+              <p style="margin:0;text-align:center;">
+                <a href="https://proverbs31way.com/unsubscribe" style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#6B9E8F;text-decoration:underline;">Unsubscribe</a>
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -70,38 +146,26 @@ Deno.serve(async (req: Request) => {
     }
 
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
-    const fromEmail =
-      Deno.env.get("RESEND_FROM_EMAIL") ?? "hello@proverbs31way.com";
-
     if (resendApiKey) {
-      const resendResponse = await fetch("https://api.resend.com/emails", {
+      const resendRes = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${resendApiKey}`,
           "Content-Type": "application/json",
+          Authorization: `Bearer ${resendApiKey}`,
         },
         body: JSON.stringify({
-          from: `The Way <${fromEmail}>`,
-          to: email,
-          subject: "You are on the list, Sister",
-          html: `
-            <div style="font-family: Georgia, serif; color: #1C1C1A; max-width: 480px; margin: 0 auto;">
-              <p style="font-size: 18px; font-style: italic;">You are on the list, sister.</p>
-              <p style="font-family: system-ui, sans-serif; font-size: 15px; color: #6B6B68; line-height: 1.6;">
-                Thank you for joining the waitlist at Proverbs31Way.com. We will see you soon.
-              </p>
-              <p style="font-family: system-ui, sans-serif; font-size: 13px; color: #9A9590; margin-top: 32px;">
-                With love,<br />The Way
-              </p>
-            </div>
-          `.trim(),
+          from: "The Way <hello@proverbs31way.com>",
+          to: [email],
+          subject: "You are on the list, sister.",
+          html: getConfirmationEmailHtml(email),
         }),
       });
 
-      if (!resendResponse.ok) {
-        const resendError = await resendResponse.text();
-        console.error("Resend error:", resendError);
+      if (!resendRes.ok) {
+        console.error("Resend error:", await resendRes.text());
       }
+    } else {
+      console.warn("RESEND_API_KEY not set — skipping confirmation email");
     }
 
     return new Response(JSON.stringify({ success: true }), {
