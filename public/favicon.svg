@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="P31">
+  <!-- Transparent background; inspired by Proverbs 31 Way P31 mark -->
+  <defs>
+    <style><![CDATA[
+      .serif-heavy { font-family: Georgia, "Times New Roman", serif; }
+    ]]></style>
+  </defs>
+  <!-- Arc (dusty rose) -->
+  <path
+    fill="none"
+    stroke="#D4847A"
+    stroke-width="2.2"
+    stroke-linecap="round"
+    d="M 18 58 A 36 36 0 1 1 82 58"
+  />
+  <!-- Branch + leaves -->
+  <g fill="none" stroke="#D4847A" stroke-linecap="round" stroke-linejoin="round">
+    <path stroke-width="1.6" d="M 20 64 Q 14 52 24 46" />
+    <ellipse cx="17" cy="58" rx="3" ry="5" fill="#D4847A" stroke="none" transform="rotate(-25 17 58)" />
+    <ellipse cx="14" cy="50" rx="2.5" ry="4" fill="#D4847A" stroke="none" transform="rotate(-40 14 50)" />
+    <ellipse cx="22" cy="48" rx="2.5" ry="4" fill="#D4847A" stroke="none" transform="rotate(15 22 48)" />
+  </g>
+  <!-- P -->
+  <text
+    x="30"
+    y="64"
+    class="serif-heavy"
+    font-size="34"
+    font-weight="600"
+    fill="#1C1C1A"
+  >P</text>
+  <!-- 31 -->
+  <text
+    x="58"
+    y="64"
+    class="serif-heavy"
+    font-size="20"
+    font-weight="600"
+    fill="#D4847A"
+  >31</text>
+</svg>
