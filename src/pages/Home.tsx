@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useLayoutEffect, useState, type MouseEv
 import { Link } from 'react-router';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { ContactSection } from '@/components/ContactSection';
 import { supabaseBrowser, fetchWaitlistCount } from '@/lib/supabaseBrowser';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -13,6 +14,10 @@ function scrollToWaitlistAnchor(e: MouseEvent<HTMLAnchorElement>) {
 
 function scrollToWaitlist() {
   document.getElementById('waitlist')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function scrollToPageSection(id: string) {
+  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 /* ───────────────────── Data ───────────────────── */
@@ -78,7 +83,12 @@ function Navigation() {
         </a>
 
         <div className="hidden md:flex items-center gap-8">
-          <a href="#about" className="eyebrow hover:text-way-rose transition-colors">
+          <a
+            href="https://christianappempire.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="eyebrow hover:text-way-rose transition-colors"
+          >
             About
           </a>
           <a href="#rooms" className="eyebrow hover:text-way-rose transition-colors">
@@ -425,23 +435,36 @@ function Footer() {
             </a>
             <p className="font-sans text-xs text-way-gray">Daily scripture. Real conversation.</p>
           </div>
-          <div className="flex items-center gap-6 md:gap-8">
-            {['About', 'Rooms', 'Join', 'Contact'].map((link) =>
-              link === 'Join' ? (
-                <a
-                  key={link}
-                  href="#/"
-                  onClick={scrollToWaitlistAnchor}
-                  className="eyebrow hover:text-way-rose transition-colors"
-                >
-                  {link}
-                </a>
-              ) : (
-                <a key={link} href={`#${link.toLowerCase()}`} className="eyebrow hover:text-way-rose transition-colors">
-                  {link}
-                </a>
-              ),
-            )}
+          <div className="flex flex-wrap items-center gap-6 md:gap-8">
+            <a
+              href="https://christianappempire.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="eyebrow hover:text-way-rose transition-colors"
+            >
+              About
+            </a>
+            <button
+              type="button"
+              onClick={() => scrollToPageSection('rooms')}
+              className="eyebrow hover:text-way-rose transition-colors bg-transparent border-0 p-0 cursor-pointer font-sans text-inherit"
+            >
+              Rooms
+            </button>
+            <a
+              href="#/"
+              onClick={scrollToWaitlistAnchor}
+              className="eyebrow hover:text-way-rose transition-colors"
+            >
+              Join
+            </a>
+            <button
+              type="button"
+              onClick={() => scrollToPageSection('contact')}
+              className="eyebrow hover:text-way-rose transition-colors bg-transparent border-0 p-0 cursor-pointer font-sans text-inherit"
+            >
+              Contact
+            </button>
           </div>
           <div className="footer-tagline">
             <p className="verse-text text-sm text-way-gray">For the woman who fears the Lord.</p>
@@ -518,6 +541,7 @@ export default function HomePage() {
         <FiveRoomsSection />
         <WaitlistSection waitlistCount={waitlistCount} />
         <QuoteSection />
+        <ContactSection variant="home" />
         <Footer />
       </main>
       <div className="fixed inset-0 pointer-events-none z-[200] opacity-[0.04]" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`, backgroundRepeat: 'repeat', backgroundSize: '200px 200px', mixBlendMode: 'multiply' }} />

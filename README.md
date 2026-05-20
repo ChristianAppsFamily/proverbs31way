@@ -26,4 +26,12 @@ Vite only exposes variables prefixed with `VITE_` by default; this repo also exp
 
 Redeploy on Vercel after adding or changing these.
 
-**Live waitlist count** on the marketing site uses a `GET` request to the `join-waitlist` Edge Function (service-role count). Redeploy that function after pulling these changes so hero and founding-spot numbers stay accurate when RLS blocks anon `SELECT` on `waitlist`.
+### Contact form
+
+The landing and `/home` footers link to **`#contact`**, which posts to the **`send-contact`** Edge Function. It emails **hello@proverbs31way.com** (primary inbox) and **BCCs ChristianAppEmpire@gmail.com** via Resend. Deploy after pulling:
+
+```bash
+supabase functions deploy send-contact
+```
+
+Uses the same **`RESEND_API_KEY`** as `join-waitlist`. Ensure **hello@proverbs31way.com** is a verified sending domain in Resend.

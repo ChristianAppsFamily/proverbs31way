@@ -6,6 +6,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router";
+import { ContactSection } from "@/components/ContactSection";
 import { supabaseBrowser, fetchWaitlistCount } from "@/lib/supabaseBrowser";
 
 /* ═══════════════════════════════════════════
@@ -419,7 +420,7 @@ export default function LandingV1() {
       {/* ═══════════════════════════════════════════
           5. ROOMS TEASER
           ═══════════════════════════════════════════ */}
-      <section className="py-20 md:py-28" style={{ backgroundColor: "#F2F0EB" }}>
+      <section id="rooms" className="py-20 md:py-28" style={{ backgroundColor: "#F2F0EB" }}>
         <div className="px-6 md:px-10 lg:px-[8vw]">
           <ScrollFade>
             <div className="text-center mb-14">
@@ -580,6 +581,8 @@ export default function LandingV1() {
         </div>
       </section>
 
+      <ContactSection variant="landing" />
+
       {/* ═══════════════════════════════════════════
           8. FOOTER
           ═══════════════════════════════════════════ */}
@@ -594,21 +597,36 @@ export default function LandingV1() {
               </Link>
               <p className="font-sans text-xs text-way-gray">Daily scripture. Real conversation.</p>
             </div>
-            <div className="flex items-center gap-6">
-              {["About", "Rooms", "Join", "Contact"].map((link) => (
-                <a
-                  key={link}
-                  href="#/"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (link === "Join") scrollToSection("waitlist");
-                    else scrollToSection(link.toLowerCase());
-                  }}
-                  className="eyebrow hover:text-way-rose transition-colors"
-                >
-                  {link}
-                </a>
-              ))}
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+              <a
+                href="https://christianappempire.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="eyebrow hover:text-way-rose transition-colors"
+              >
+                About
+              </a>
+              <button
+                type="button"
+                onClick={() => scrollToSection("rooms")}
+                className="eyebrow hover:text-way-rose transition-colors bg-transparent border-0 p-0 cursor-pointer font-sans text-inherit"
+              >
+                Rooms
+              </button>
+              <button
+                type="button"
+                onClick={() => scrollToSection("waitlist")}
+                className="eyebrow hover:text-way-rose transition-colors bg-transparent border-0 p-0 cursor-pointer font-sans text-inherit"
+              >
+                Join
+              </button>
+              <button
+                type="button"
+                onClick={() => scrollToSection("contact")}
+                className="eyebrow hover:text-way-rose transition-colors bg-transparent border-0 p-0 cursor-pointer font-sans text-inherit"
+              >
+                Contact
+              </button>
             </div>
             <p className="verse-text text-xs text-way-gray">For the woman who fears the Lord.</p>
           </div>
