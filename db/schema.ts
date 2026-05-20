@@ -29,7 +29,7 @@ export const users = mysqlTable("users", {
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
-/* ─── Daily Content — The Garden's scripture + devotional ─── */
+/* ─── Daily Content, The Garden's scripture + devotional ─── */
 
 export const dailyContent = mysqlTable("daily_content", {
   id: serial("id").primaryKey(),

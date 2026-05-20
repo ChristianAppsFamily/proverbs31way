@@ -1,10 +1,10 @@
 /**
- * RoomLayout — Shared three-column shell for all five rooms.
+ * RoomLayout, Shared three-column shell for all five rooms.
  *
  * Renders:
  *   1. Fixed nav bar (logo left, room name right)
  *   2. Left sidebar: date list, reading streak, room navigation
- *   3. Center column: {children} — the only thing that changes per room
+ *   3. Center column: {children}, the only thing that changes per room
  *   4. Right sidebar: "Sisters in conversation" comment feed
  */
 
@@ -141,7 +141,7 @@ function CommentBubble({ name, body, time }: { name: string; body: string; time:
   );
 }
 
-/** Comment sidebar content — shared by desktop right sidebar and mobile */
+/** Comment sidebar content, shared by desktop right sidebar and mobile */
 function SistersPanel({
   roomSlug,
   onJoinWaitlist,

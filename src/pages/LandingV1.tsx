@@ -1,12 +1,12 @@
 /**
- * The Way — V1 Marketing Landing Page
+ * The Way: V1 Marketing Landing Page
  * Pure conversion funnel. Every section drives toward waitlist signup.
  * No product feature demos. Only emotion, aspiration, and belonging.
  */
 
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router";
-import { supabaseBrowser } from "@/lib/supabaseBrowser";
+import { supabaseBrowser, fetchWaitlistCount } from "@/lib/supabaseBrowser";
 
 /* ═══════════════════════════════════════════
    Data
@@ -34,7 +34,7 @@ const waitlistSectionColors = {
 
 const foundingBenefits = [
   "Lifetime Founding Sister badge on your profile",
-  "Free first year — no subscription, ever",
+  "Free first year, no subscription, ever",
   "Shape the community from day one",
   "Private Founding Sisters channel",
   "Name inscribed in the opening prayer scroll",
@@ -109,10 +109,8 @@ export default function LandingV1() {
   const [waitlistCount, setWaitlistCount] = useState<number | null>(null);
 
   const refreshWaitlistCount = useCallback(async () => {
-    const { count, error } = await supabaseBrowser
-      .from("waitlist")
-      .select("*", { count: "exact", head: true });
-    if (!error) setWaitlistCount(count ?? 0);
+    const n = await fetchWaitlistCount();
+    if (n !== null) setWaitlistCount(n);
   }, []);
 
   useEffect(() => {
@@ -155,7 +153,7 @@ export default function LandingV1() {
       return;
     }
 
-    const payload = data as { success?: boolean; error?: string } | null;
+    const payload = data as { success?: boolean; error?: string; count?: number } | null;
     if (payload?.error) {
       setWaitlistStatus("error");
       setWaitlistError(payload.error);
@@ -169,6 +167,7 @@ export default function LandingV1() {
     }
 
     setWaitlistStatus("success");
+    if (typeof payload?.count === "number") setWaitlistCount(payload.count);
     void refreshWaitlistCount();
   };
 
@@ -216,14 +215,14 @@ export default function LandingV1() {
 
             <ScrollFade className="animate-delay-2">
               <p className="font-sans text-lg md:text-xl text-way-gray leading-relaxed max-w-lg mb-8">
-                Daily scripture. Real conversation. Five rooms for the woman who wants more than a devotional app — she wants a sisterhood.
+                Daily scripture. Real conversation. Five rooms for the woman who wants more than a devotional app: she wants a sisterhood.
               </p>
             </ScrollFade>
 
             <ScrollFade className="animate-delay-3">
               <div className="flex flex-wrap items-center gap-4 mb-6">
                 <CTAButton className="bg-way-rose text-white hover:bg-way-rose/90">
-                  Join the Waitlist — It's Free
+                  Join the Waitlist (It's Free)
                 </CTAButton>
                 <a
                   href="/#/garden"
@@ -246,7 +245,7 @@ export default function LandingV1() {
                 </div>
                 <p className="font-sans text-sm text-way-gray">
                   <span className="font-medium text-way-text tabular-nums">
-                    {waitlistCount === null ? "—" : waitlistCount.toLocaleString()}
+                    {waitlistCount === null ? "…" : waitlistCount.toLocaleString()}
                   </span>{" "}
                   sisters already waiting
                 </p>
@@ -262,7 +261,7 @@ export default function LandingV1() {
       </section>
 
       {/* ═══════════════════════════════════════════
-          2. THE PROBLEM — "It shouldn't be this hard"
+          2. THE PROBLEM: "It shouldn't be this hard"
           ═══════════════════════════════════════════ */}
       <section className="py-20 md:py-28 px-6 md:px-10 lg:px-[8vw]">
         <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-center">
@@ -301,7 +300,7 @@ export default function LandingV1() {
                 <p className="font-serif italic text-way-text text-base leading-snug">
                   "I was so tired of doing this by myself."
                 </p>
-                <p className="font-sans text-xs text-way-gray mt-2">— Jessica R., Early Member</p>
+                <p className="font-sans text-xs text-way-gray mt-2">Jessica R., Early Member</p>
               </div>
             </div>
           </ScrollFade>
@@ -309,7 +308,7 @@ export default function LandingV1() {
       </section>
 
       {/* ═══════════════════════════════════════════
-          3. THE VISION — "The Way is a home"
+          3. THE VISION: "The Way is a home"
           ═══════════════════════════════════════════ */}
       <section className="py-20 md:py-28" style={{ backgroundColor: "#F2F0EB" }}>
         <div className="px-6 md:px-10 lg:px-[8vw] max-w-5xl mx-auto">
@@ -455,7 +454,7 @@ export default function LandingV1() {
       </section>
 
       {/* ═══════════════════════════════════════════
-          6. FOUNDING SISTERS — Urgency
+          6. FOUNDING SISTERS: Urgency
           ═══════════════════════════════════════════ */}
       <section className="py-20 md:py-28 px-6 md:px-10 lg:px-[8vw]">
         <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-center">
@@ -470,7 +469,7 @@ export default function LandingV1() {
             </ScrollFade>
             <ScrollFade className="animate-delay-2">
               <p className="font-sans text-base text-way-gray leading-relaxed mb-8">
-                The first 500 women through the door become Founding Sisters — forever recognized inside The Way. Your name on the scroll. Your voice shaping what we become. No subscription. No catch. Just first access to a home built for you.
+                The first 500 women through the door become Founding Sisters, forever recognized inside The Way. Your name on the scroll. Your voice shaping what we become. No subscription. No catch. Just first access to a home built for you.
               </p>
             </ScrollFade>
             <ScrollFade className="animate-delay-3">
@@ -491,7 +490,7 @@ export default function LandingV1() {
                 </span>
                 <span className="font-sans text-sm text-way-text tabular-nums">
                   <span className="font-medium">
-                    {waitlistCount === null ? "—" : waitlistCount.toLocaleString()}
+                    {waitlistCount === null ? "…" : waitlistCount.toLocaleString()}
                   </span>{" "}
                   of {FOUNDING_SPOTS_TOTAL.toLocaleString()} spots claimed
                 </span>
@@ -575,7 +574,7 @@ export default function LandingV1() {
 
           <ScrollFade className="animate-delay-4">
             <p className="verse-text text-sm text-way-gray/70 mt-8">
-              &ldquo;She perceives that her merchandise is profitable.&rdquo; — Proverbs 31:18
+              &ldquo;She perceives that her merchandise is profitable.&rdquo; Proverbs 31:18
             </p>
           </ScrollFade>
         </div>

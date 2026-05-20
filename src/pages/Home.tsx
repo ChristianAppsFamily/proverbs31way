@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useLayoutEffect, useState, type MouseEv
 import { Link } from 'react-router';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { supabaseBrowser } from '@/lib/supabaseBrowser';
+import { supabaseBrowser, fetchWaitlistCount } from '@/lib/supabaseBrowser';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -164,7 +164,7 @@ function HeroSection({ waitlistCount }: { waitlistCount: number | null }) {
           </div>
           <p className="hero-micro font-sans text-xs text-way-gray/70 mb-8">
             <span className="font-medium text-way-text tabular-nums">
-              {waitlistCount === null ? "—" : waitlistCount.toLocaleString()}
+              {waitlistCount === null ? "…" : waitlistCount.toLocaleString()}
             </span>{" "}
             sisters are already waiting.
           </p>
@@ -310,7 +310,7 @@ function WaitlistSection({ waitlistCount }: { waitlistCount: number | null }) {
             </div>
             <p className="font-sans text-sm text-way-sage mb-3">
               <span className="font-medium text-way-text tabular-nums">
-                {waitlistCount === null ? "—" : waitlistCount.toLocaleString()}
+                {waitlistCount === null ? "…" : waitlistCount.toLocaleString()}
               </span>{" "}
               women are already waiting.
             </p>
@@ -461,10 +461,8 @@ export default function HomePage() {
   const [waitlistCount, setWaitlistCount] = useState<number | null>(null);
 
   const refreshWaitlistCount = useCallback(async () => {
-    const { count, error } = await supabaseBrowser
-      .from("waitlist")
-      .select("*", { count: "exact", head: true });
-    if (!error) setWaitlistCount(count ?? 0);
+    const n = await fetchWaitlistCount();
+    if (n !== null) setWaitlistCount(n);
   }, []);
 
   useEffect(() => {

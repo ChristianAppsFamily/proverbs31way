@@ -1,7 +1,7 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 /**
- * Proverbs 31 Way (linked Supabase project) — public URL + anon key.
+ * Proverbs 31 Way (linked Supabase project): public URL + anon key.
  * Safe to ship: anon is scoped by RLS. Override with VITE_* or NEXT_PUBLIC_* on Vercel / .env.local.
  */
 const DEFAULT_SUPABASE_URL = "https://gjwgxkfrixknjczmlsef.supabase.co";
@@ -20,3 +20,31 @@ const anonKey =
 
 /** Browser client for Edge Functions (waitlist) and public reads. */
 export const supabaseBrowser: SupabaseClient = createClient(url, anonKey);
+
+/**
+ * Live waitlist size via Edge Function GET (service-role count). Falls back to REST count if needed.
+ * Redeploy `join-waitlist` after adding GET so production returns accurate counts when RLS blocks anon SELECT.
+ */
+export async function fetchWaitlistCount(): Promise<number | null> {
+  try {
+    const res = await fetch(`${url}/functions/v1/join-waitlist`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${anonKey}`,
+        apikey: anonKey,
+      },
+    });
+    if (res.ok) {
+      const body = (await res.json()) as { count?: number };
+      if (typeof body.count === "number") return body.count;
+    }
+  } catch {
+    /* old deployment or offline */
+  }
+
+  const { count, error } = await supabaseBrowser
+    .from("waitlist")
+    .select("*", { count: "exact", head: true });
+  if (!error && count !== null) return count;
+  return null;
+}

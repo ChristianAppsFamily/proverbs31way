@@ -1,5 +1,5 @@
 /**
- * Waitlist confirmation email — Proverbs31Way.com
+ * Waitlist confirmation email, Proverbs31Way.com
  * Inline styles only (Resend React). Warm personal letter tone.
  *
  * Edge function HTML mirror: supabase/functions/join-waitlist/index.ts
@@ -173,7 +173,7 @@ export default function WaitlistConfirmation() {
                             color: "#1C1C1A",
                           }}
                         >
-                          The doors to The Way are not open yet — but when they are, you will be the first inside.
+                          The doors to The Way are not open yet, but when they are, you will be the first inside.
                           Founding Sisters receive lifetime recognition inside the community.
                         </p>
                         <p

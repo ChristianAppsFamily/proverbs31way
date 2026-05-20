@@ -51,7 +51,7 @@ function getConfirmationEmailHtml(_email: string): string {
             <td style="padding-bottom:28px;">
               <p style="margin:0 0 20px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.8;color:#1C1C1A;">Sister,</p>
               <p style="margin:0 0 20px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.8;color:#1C1C1A;">You are on the list.</p>
-              <p style="margin:0 0 20px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.8;color:#1C1C1A;">The doors to The Way are not open yet — but when they are, you will be the first inside. Founding Sisters receive lifetime recognition inside the community.</p>
+              <p style="margin:0 0 20px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.8;color:#1C1C1A;">The doors to The Way are not open yet, but when they are, you will be the first inside. Founding Sisters receive lifetime recognition inside the community.</p>
               <p style="margin:0 0 20px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.8;color:#1C1C1A;">While you wait, we will send you a verse each week to carry with you.</p>
               <p style="margin:0 0 20px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.8;color:#1C1C1A;">The journey begins soon.</p>
               <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.8;color:#1C1C1A;">With love,<br />The Way</p>
@@ -84,9 +84,54 @@ function getConfirmationEmailHtml(_email: string): string {
 </html>`;
 }
 
+async function waitlistRowCount(
+  supabase: ReturnType<typeof createClient>,
+): Promise<number> {
+  const { count, error } = await supabase
+    .from("waitlist")
+    .select("*", { count: "exact", head: true });
+  if (error) {
+    console.error("waitlist count error:", error);
+    return 0;
+  }
+  return count ?? 0;
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
+  }
+
+  /** Public count for marketing UI (service role; anon cannot rely on RLS SELECT). */
+  if (req.method === "GET") {
+    try {
+      const supabaseUrl = Deno.env.get("SUPABASE_URL");
+      const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+      if (!supabaseUrl || !serviceRoleKey) {
+        return new Response(
+          JSON.stringify({ error: "Server configuration error" }),
+          {
+            status: 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          },
+        );
+      }
+      const supabase = createClient(supabaseUrl, serviceRoleKey);
+      const count = await waitlistRowCount(supabase);
+      return new Response(JSON.stringify({ count }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    } catch (err) {
+      console.error("join-waitlist GET error:", err);
+      return new Response(
+        JSON.stringify({ error: "Something went wrong." }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
+    }
   }
 
   if (req.method !== "POST") {
@@ -165,10 +210,11 @@ Deno.serve(async (req: Request) => {
         console.error("Resend error:", await resendRes.text());
       }
     } else {
-      console.warn("RESEND_API_KEY not set — skipping confirmation email");
+      console.warn("RESEND_API_KEY not set; skipping confirmation email");
     }
 
-    return new Response(JSON.stringify({ success: true }), {
+    const count = await waitlistRowCount(supabase);
+    return new Response(JSON.stringify({ success: true, count }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

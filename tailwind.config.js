@@ -38,7 +38,7 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        // The Way custom colors — v2 warmer & more energetic
+        // The Way custom colors, v2 warmer & more energetic
         'way-white': '#FBF7F2',
         'way-surface': '#F5EDE3',
         'way-rose': '#D4695A',
