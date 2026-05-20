@@ -25,13 +25,3 @@ The marketing site calls `join-waitlist` using the browser Supabase client. Set 
 Vite only exposes variables prefixed with `VITE_` by default; this repo also exposes `NEXT_PUBLIC_*` so the same Vercel vars as Next.js work. The browser client falls back to the linked production Supabase project URL and **public anon** key when env is unset (so static builds still work); override with env for forks or staging.
 
 Redeploy on Vercel after adding or changing these.
-
-### Contact form
-
-The landing and `/home` footers link to **`#contact`**, which posts to the **`send-contact`** Edge Function. It emails **hello@proverbs31way.com** (primary inbox) and **BCCs ChristianAppEmpire@gmail.com** via Resend. Deploy after pulling:
-
-```bash
-supabase functions deploy send-contact
-```
-
-Uses the same **`RESEND_API_KEY`** as `join-waitlist`. Ensure **hello@proverbs31way.com** is a verified sending domain in Resend.

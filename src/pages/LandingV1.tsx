@@ -6,7 +6,6 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router";
-import { ContactSection } from "@/components/ContactSection";
 import { supabaseBrowser, fetchWaitlistCount } from "@/lib/supabaseBrowser";
 
 /* ═══════════════════════════════════════════
@@ -298,10 +297,40 @@ export default function LandingV1() {
                 className="w-full h-[420px] md:h-[520px] object-cover rounded-2xl shadow-card"
               />
               <div className="absolute -bottom-5 -left-5 bg-way-surface rounded-xl p-5 shadow-warm max-w-[240px]">
-                <p className="font-serif italic text-way-text text-base leading-snug">
-                  "I was so tired of doing this by myself."
+                <p
+                  style={{
+                    fontFamily: '"Cormorant Garamond", Georgia, serif',
+                    fontSize: "28px",
+                    fontStyle: "italic",
+                    lineHeight: 1.7,
+                    color: "#1C1C1A",
+                  }}
+                >
+                  Carry each other&apos;s burdens, and in this way you will fulfill the law of Christ.
                 </p>
-                <p className="font-sans text-xs text-way-gray mt-2">Jessica R., Early Member</p>
+                <div
+                  className="mx-auto"
+                  style={{
+                    width: "48px",
+                    height: "1px",
+                    backgroundColor: "#D4847A",
+                    marginTop: "20px",
+                    marginBottom: "20px",
+                  }}
+                  aria-hidden
+                />
+                <p
+                  style={{
+                    fontFamily: '"DM Sans", system-ui, sans-serif',
+                    fontSize: "12px",
+                    fontWeight: 500,
+                    letterSpacing: "0.15em",
+                    textTransform: "uppercase",
+                    color: "#6B9E8F",
+                  }}
+                >
+                  GALATIANS 6:2
+                </p>
               </div>
             </div>
           </ScrollFade>
@@ -581,8 +610,6 @@ export default function LandingV1() {
         </div>
       </section>
 
-      <ContactSection variant="landing" />
-
       {/* ═══════════════════════════════════════════
           8. FOOTER
           ═══════════════════════════════════════════ */}
@@ -620,13 +647,12 @@ export default function LandingV1() {
               >
                 Join
               </button>
-              <button
-                type="button"
-                onClick={() => scrollToSection("contact")}
-                className="eyebrow hover:text-way-rose transition-colors bg-transparent border-0 p-0 cursor-pointer font-sans text-inherit"
+              <a
+                href="mailto:hello@proverbs31way.com"
+                className="eyebrow hover:text-way-rose transition-colors"
               >
                 Contact
-              </button>
+              </a>
             </div>
             <p className="verse-text text-xs text-way-gray">For the woman who fears the Lord.</p>
           </div>

@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, useLayoutEffect, useState, type MouseEv
 import { Link } from 'react-router';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ContactSection } from '@/components/ContactSection';
 import { supabaseBrowser, fetchWaitlistCount } from '@/lib/supabaseBrowser';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -458,13 +457,12 @@ function Footer() {
             >
               Join
             </a>
-            <button
-              type="button"
-              onClick={() => scrollToPageSection('contact')}
-              className="eyebrow hover:text-way-rose transition-colors bg-transparent border-0 p-0 cursor-pointer font-sans text-inherit"
+            <a
+              href="mailto:hello@proverbs31way.com"
+              className="eyebrow hover:text-way-rose transition-colors"
             >
               Contact
-            </button>
+            </a>
           </div>
           <div className="footer-tagline">
             <p className="verse-text text-sm text-way-gray">For the woman who fears the Lord.</p>
@@ -541,7 +539,6 @@ export default function HomePage() {
         <FiveRoomsSection />
         <WaitlistSection waitlistCount={waitlistCount} />
         <QuoteSection />
-        <ContactSection variant="home" />
         <Footer />
       </main>
       <div className="fixed inset-0 pointer-events-none z-[200] opacity-[0.04]" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`, backgroundRepeat: 'repeat', backgroundSize: '200px 200px', mixBlendMode: 'multiply' }} />
