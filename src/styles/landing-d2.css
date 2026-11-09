@@ -36,6 +36,25 @@
   line-height: 1.5;
 }
 
+/* Hero brand line — stronger than section eyebrows so it holds over the photo veil */
+.landing-d2 .ld2-hero-tagline {
+  margin: 0 0 1.15rem;
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink);
+  line-height: 1.55;
+}
+
+@media (min-width: 768px) {
+  .landing-d2 .ld2-hero-tagline {
+    font-size: 13px;
+    letter-spacing: 0.16em;
+  }
+}
+
 .landing-d2 .ld2-display {
   font-family: var(--serif);
   font-weight: 400;

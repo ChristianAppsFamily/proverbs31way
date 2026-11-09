@@ -755,7 +755,7 @@ export default function SundayJournalPage() {
             the <em>way.</em>
           </div>
           <div>
-            <span className="quiet-label" style={{ color: "#f2dfe7" }}>
+            <span className="footer-tagline">
               A HOME FOR THE DAUGHTERS OF GOD
             </span>
             <p>
