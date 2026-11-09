@@ -5,49 +5,55 @@ import {
   useRef,
   useState,
 } from "react";
-import type { FormEvent } from "react";
+import type { FormEvent, RefObject } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import "@/styles/sunday-journal.css";
 import {
-  ARCHIVE_DAYS,
-  EDITIONS,
-  editionByIso,
-  verseParts,
-} from "./sampleData";
+  createPost,
+  createReply,
+  createReport,
+  fetchArchiveDays,
+  fetchEditionByDate,
+  fetchGatheringPosts,
+  requestMagicLink,
+  signOut,
+  toggleReaction,
+} from "@/lib/sundayJournal/api";
+import { isIsoDate, todayIso } from "@/lib/sundayJournal/dates";
 import type {
-  DayKey,
+  ArchiveDay,
+  Edition,
   FeedFilter,
   Post,
   PostKind,
-  PreviewMode,
-} from "./types";
-
-function clonePosts(posts: Post[]): Post[] {
-  return posts.map((p) => ({
-    ...p,
-    replies: p.replies.map((r) => ({ ...r })),
-  }));
-}
+} from "@/lib/sundayJournal/types";
+import { useAuth } from "@/providers/AuthProvider";
 
 export default function SundayJournalPage() {
   const { date } = useParams<{ date?: string }>();
   const navigate = useNavigate();
+  const { user, profile, loading: authLoading } = useAuth();
 
-  const initialEdition = editionByIso(date);
-  const [dayKey, setDayKey] = useState<DayKey>(initialEdition.key);
-  const [mode, setMode] = useState<PreviewMode>("member");
+  const requestedDate = date && isIsoDate(date) ? date : undefined;
+  const isTodayRoute = !requestedDate;
+  const calendarToday = todayIso();
+
+  const [edition, setEdition] = useState<Edition | null>(null);
+  const [editionMissing, setEditionMissing] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [loadingEdition, setLoadingEdition] = useState(true);
+  const [archiveDays, setArchiveDays] = useState<ArchiveDay[]>([]);
+  const [posts, setPosts] = useState<Post[]>([]);
   const [filter, setFilter] = useState<FeedFilter>("all");
   const [postKind, setPostKind] = useState<PostKind>("reflection");
-  const [posts, setPosts] = useState<Post[]>(() =>
-    clonePosts(initialEdition.posts),
-  );
-  const [reacted, setReacted] = useState<Set<number>>(() => new Set());
-  const [openReplies, setOpenReplies] = useState<Set<number>>(() => new Set());
   const [composeText, setComposeText] = useState("");
   const [moreOpen, setMoreOpen] = useState(false);
+  const [openReplies, setOpenReplies] = useState<Set<string>>(() => new Set());
   const [toast, setToast] = useState<string | null>(null);
   const [signMessage, setSignMessage] = useState<string | null>(null);
-  const [previewOpen, setPreviewOpen] = useState(false);
+  const [signBusy, setSignBusy] = useState(false);
+  const [reportPostId, setReportPostId] = useState<string | null>(null);
+  const [busyPostId, setBusyPostId] = useState<string | null>(null);
 
   const archiveRef = useRef<HTMLDialogElement>(null);
   const signRef = useRef<HTMLDialogElement>(null);
@@ -58,10 +64,10 @@ export default function SundayJournalPage() {
   const emailId = useId();
   const reportReasonId = useId();
 
-  const edition = EDITIONS[dayKey];
-  const isToday = dayKey === "today";
-  const isPast = !isToday;
-  const verse = verseParts(edition);
+  const isMember = Boolean(user && profile);
+  const editionDate = edition?.dateIso ?? requestedDate ?? calendarToday;
+  const isToday = editionDate === calendarToday;
+  const isPast = Boolean(edition && !isToday);
 
   const announce = useCallback((message: string) => {
     setToast(message);
@@ -75,35 +81,92 @@ export default function SundayJournalPage() {
     };
   }, []);
 
-  useEffect(() => {
-    const next = editionByIso(date);
-    setDayKey(next.key);
-    setPosts(clonePosts(next.posts));
-    setFilter("all");
-    setMoreOpen(false);
-    setReacted(new Set());
-    setOpenReplies(new Set());
-    setComposeText("");
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [date]);
+  const reloadGathering = useCallback(
+    async (editionId: string) => {
+      const next = await fetchGatheringPosts(editionId, user?.id ?? null);
+      setPosts(next);
+    },
+    [user?.id],
+  );
 
-  const loadDay = (key: DayKey) => {
-    const next = EDITIONS[key];
-    if (key === "today") {
-      navigate("/today");
-    } else {
-      navigate(`/readings/${next.dateIso}`);
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      setLoadingEdition(true);
+      setLoadError(null);
+      setEditionMissing(false);
+      setFilter("all");
+      setMoreOpen(false);
+      setOpenReplies(new Set());
+      setComposeText("");
+
+      try {
+        if (date && !isIsoDate(date)) {
+          if (!cancelled) {
+            setEdition(null);
+            setPosts([]);
+            setEditionMissing(true);
+          }
+          return;
+        }
+
+        const [nextEdition, archive] = await Promise.all([
+          fetchEditionByDate(requestedDate),
+          fetchArchiveDays(),
+        ]);
+
+        if (cancelled) return;
+
+        setArchiveDays(archive);
+
+        if (!nextEdition) {
+          setEdition(null);
+          setPosts([]);
+          setEditionMissing(true);
+          return;
+        }
+
+        setEdition(nextEdition);
+        await reloadGathering(nextEdition.id);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } catch (err) {
+        console.error(err);
+        if (!cancelled) {
+          setLoadError(
+            err instanceof Error ? err.message : "Could not load today’s reading.",
+          );
+          setEdition(null);
+          setPosts([]);
+        }
+      } finally {
+        if (!cancelled) setLoadingEdition(false);
+      }
     }
-  };
+
+    void load();
+    return () => {
+      cancelled = true;
+    };
+  }, [date, requestedDate, reloadGathering]);
 
   const openSignIn = () => {
     setSignMessage(null);
     signRef.current?.showModal();
   };
 
+  const openReport = (postId: string) => {
+    if (!isMember) {
+      openSignIn();
+      return;
+    }
+    setReportPostId(postId);
+    reportRef.current?.showModal();
+  };
+
   const rootClass = [
     "sunday-journal",
-    mode === "guest" ? "guest" : "",
+    !isMember ? "guest" : "",
     isPast ? "past" : "",
   ]
     .filter(Boolean)
@@ -113,48 +176,60 @@ export default function SundayJournalPage() {
     (p) => filter === "all" || p.kind === filter,
   );
 
-  const handleCompose = (e: FormEvent) => {
+  const handleCompose = async (e: FormEvent) => {
     e.preventDefault();
-    if (mode !== "member" || !isToday) return;
+    if (!isMember || !profile || !edition || !isToday) return;
     const value = composeText.trim();
     if (!value) return;
-    setPosts((prev) => [
-      {
-        id: Date.now(),
-        initials: "TW",
-        name: "You",
-        time: "Just now",
+
+    try {
+      await createPost({
+        editionId: edition.id,
+        authorId: profile.id,
         kind: postKind,
-        text: value,
-        count: 0,
-        replies: [],
-        pending: true,
-      },
-      ...prev,
-    ]);
-    setComposeText("");
-    setFilter("all");
-    announce("Saved to the review queue · demo only");
+        body: value,
+      });
+      setComposeText("");
+      setFilter("all");
+      await reloadGathering(edition.id);
+      announce("Your response is live.");
+    } catch (err) {
+      console.error(err);
+      announce(
+        err instanceof Error ? err.message : "Could not post. Please try again.",
+      );
+    }
   };
 
-  const toggleReact = (id: number) => {
-    if (mode === "guest") {
+  const handleToggleReact = async (post: Post) => {
+    if (!isMember || !profile) {
       openSignIn();
       return;
     }
     if (!isToday) {
-      announce("Past day is read-only");
+      announce("Past day is read-only.");
       return;
     }
-    setReacted((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
+    if (busyPostId === post.id) return;
+    setBusyPostId(post.id);
+    try {
+      await toggleReaction({
+        postId: post.id,
+        userId: profile.id,
+        currentlyReacted: post.reactedByMe,
+      });
+      await reloadGathering(edition!.id);
+    } catch (err) {
+      console.error(err);
+      announce(
+        err instanceof Error ? err.message : "Could not save your response.",
+      );
+    } finally {
+      setBusyPostId(null);
+    }
   };
 
-  const toggleReplies = (id: number) => {
+  const toggleReplies = (id: string) => {
     setOpenReplies((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
@@ -163,29 +238,149 @@ export default function SundayJournalPage() {
     });
   };
 
-  const submitReply = (postId: number, text: string) => {
-    if (mode !== "member") {
+  const submitReply = async (postId: string, text: string) => {
+    if (!isMember || !profile) {
       openSignIn();
       return;
     }
-    setPosts((prev) =>
-      prev.map((p) =>
-        p.id === postId
-          ? {
-              ...p,
-              replies: [
-                ...p.replies,
-                { name: "You", time: "Awaiting approval", text },
-              ],
-            }
-          : p,
-      ),
-    );
-    announce("Reply saved to review queue · demo only");
+    if (!edition || !isToday) return;
+    try {
+      await createReply({
+        postId,
+        authorId: profile.id,
+        body: text,
+      });
+      await reloadGathering(edition.id);
+      announce("Reply posted.");
+    } catch (err) {
+      console.error(err);
+      announce(
+        err instanceof Error ? err.message : "Could not post reply.",
+      );
+    }
   };
 
-  const previewActive =
-    isPast ? "past" : mode === "guest" ? "guest" : "member";
+  const handleSignIn = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const email = String(new FormData(form).get("email") ?? "").trim();
+    if (!email) return;
+    setSignBusy(true);
+    setSignMessage(null);
+    try {
+      await requestMagicLink(email);
+      setSignMessage("Check your email for a sign-in link. It may take a minute.");
+    } catch (err) {
+      console.error(err);
+      setSignMessage(
+        err instanceof Error
+          ? err.message
+          : "Could not send sign-in email. Please try again.",
+      );
+    } finally {
+      setSignBusy(false);
+    }
+  };
+
+  const handleAvatarClick = async () => {
+    if (!isMember) {
+      openSignIn();
+      return;
+    }
+    try {
+      await signOut();
+      announce("Signed out.");
+    } catch (err) {
+      console.error(err);
+      announce("Could not sign out.");
+    }
+  };
+
+  const goToDay = (dateIso: string) => {
+    if (dateIso === calendarToday) navigate("/today");
+    else navigate(`/readings/${dateIso}`);
+  };
+
+  if (loadingEdition || authLoading) {
+    return (
+      <div className="sunday-journal">
+        <main className="page-shell" style={{ paddingTop: "6rem" }}>
+          <p className="community-subtitle">Loading today’s gathering…</p>
+        </main>
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="sunday-journal">
+        <main className="page-shell" style={{ paddingTop: "6rem" }}>
+          <h1 className="devotion-title">Something went wrong.</h1>
+          <p className="community-subtitle">{loadError}</p>
+          <button
+            className="publish"
+            type="button"
+            onClick={() => window.location.reload()}
+          >
+            Try again
+          </button>
+        </main>
+      </div>
+    );
+  }
+
+  if (editionMissing || !edition) {
+    return (
+      <div className="sunday-journal">
+        <header className="site-header">
+          <Link className="brand" to="/today" aria-label="The Way home">
+            <span className="brand-name">
+              the <em>way.</em>
+            </span>
+            <span className="brand-meta">
+              A daily
+              <br />
+              gathering
+            </span>
+          </Link>
+        </header>
+        <main className="page-shell" style={{ paddingTop: "4rem" }}>
+          <h1 className="devotion-title">
+            {isTodayRoute ? "Today’s reading is not up yet." : "Reading not found."}
+          </h1>
+          <p className="community-subtitle" style={{ maxWidth: "32rem" }}>
+            {isTodayRoute
+              ? "Check back soon, or browse a past day if one is available."
+              : "That date does not have a published reading."}
+          </p>
+          <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
+            {!isTodayRoute ? (
+              <button className="publish" type="button" onClick={() => navigate("/today")}>
+                Go to today
+              </button>
+            ) : null}
+            {archiveDays.length > 0 ? (
+              <button
+                className="subtle-button"
+                type="button"
+                onClick={() => archiveRef.current?.showModal()}
+              >
+                Past days
+              </button>
+            ) : null}
+          </div>
+        </main>
+        <ArchiveDialog
+          dialogRef={archiveRef}
+          days={archiveDays}
+          onSelect={(dateIso) => {
+            archiveRef.current?.close();
+            goToDay(dateIso);
+          }}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className={rootClass}>
@@ -201,7 +396,7 @@ export default function SundayJournalPage() {
           onClick={(e) => {
             if (!isToday) {
               e.preventDefault();
-              loadDay("today");
+              navigate("/today");
             }
           }}
         >
@@ -228,14 +423,11 @@ export default function SundayJournalPage() {
           <button
             className="member-avatar"
             type="button"
-            title={mode === "guest" ? "Join The Way" : "Your member view"}
-            aria-label={mode === "guest" ? "Join The Way" : "Member profile"}
-            onClick={() => {
-              if (mode === "guest") openSignIn();
-              else announce("This is the signed-in member preview");
-            }}
+            title={isMember ? "Sign out" : "Join The Way"}
+            aria-label={isMember ? "Sign out" : "Join The Way"}
+            onClick={() => void handleAvatarClick()}
           >
-            {mode === "guest" ? "JOIN" : "TW"}
+            {isMember ? profile?.initials ?? "TW" : "JOIN"}
           </button>
         </nav>
       </header>
@@ -262,9 +454,9 @@ export default function SundayJournalPage() {
               <span>{edition.translation}</span>
             </div>
             <blockquote className="verse">
-              {verse.before}
-              <em>{verse.em}</em>
-              {verse.after}
+              {edition.verseBefore}
+              <em>{edition.verseEm}</em>
+              {edition.verseAfter}
             </blockquote>
             <div className="word-foot">
               <span className="quiet-label">{edition.reference}</span>
@@ -299,14 +491,16 @@ export default function SundayJournalPage() {
                 </div>
               ) : null}
             </div>
-            <button
-              className="subtle-button"
-              type="button"
-              aria-expanded={moreOpen}
-              onClick={() => setMoreOpen((v) => !v)}
-            >
-              {moreOpen ? "Show less  −" : "Continue reading  +"}
-            </button>
+            {edition.more.length > 0 ? (
+              <button
+                className="subtle-button"
+                type="button"
+                aria-expanded={moreOpen}
+                onClick={() => setMoreOpen((v) => !v)}
+              >
+                {moreOpen ? "Show less  −" : "Continue reading  +"}
+              </button>
+            ) : null}
             <div className="question-block">
               <span className="quiet-label" style={{ color: "var(--rose)" }}>
                 A question to carry
@@ -344,11 +538,11 @@ export default function SundayJournalPage() {
             </div>
           </div>
 
-          <form className="composition" onSubmit={handleCompose}>
+          <form className="composition" onSubmit={(e) => void handleCompose(e)}>
             <div className="compose-head">
               <h3 className="compose-h">Add your voice to today’s reading.</h3>
               <span className="compose-explainer">
-                Visible to our community after review
+                Visible to our community right away
               </span>
             </div>
             <label className="sr-only" htmlFor={composeId}>
@@ -391,9 +585,7 @@ export default function SundayJournalPage() {
                 </button>
               </div>
               <div className="compose-submit-row">
-                <span className="count">
-                  {composeText.length} / 240
-                </span>
+                <span className="count">{composeText.length} / 240</span>
                 <button className="publish" type="submit">
                   Post response <span aria-hidden="true">↗</span>
                 </button>
@@ -474,8 +666,6 @@ export default function SundayJournalPage() {
                 const repliesOpen = openReplies.has(post.id);
                 const action =
                   post.kind === "prayer" ? "I’m praying" : "Amen";
-                const count =
-                  post.count + (reacted.has(post.id) ? 1 : 0);
                 const replyLabel = post.replies.length
                   ? `View ${post.replies.length} ${
                       post.replies.length === 1 ? "reply" : "replies"
@@ -497,63 +687,48 @@ export default function SundayJournalPage() {
                         </span>
                         <span className="post-time">{post.time}</span>
                       </div>
-                      {post.pending ? (
-                        <span className="post-kind">
-                          Awaiting approval — visible to you only
-                        </span>
-                      ) : (
-                        <span className="post-kind">
-                          {post.kind === "prayer"
-                            ? "Prayer request"
-                            : "Reflection"}
-                        </span>
-                      )}
+                      <span className="post-kind">
+                        {post.kind === "prayer"
+                          ? "Prayer request"
+                          : "Reflection"}
+                      </span>
                       <p className="post-body">{post.text}</p>
                       <div className="post-actions">
-                        {post.pending ? (
-                          <span className="meta-fine">
-                            Your response will appear after moderator approval.
-                          </span>
-                        ) : (
-                          <>
-                            <button
-                              type="button"
-                              className={
-                                reacted.has(post.id) ? "is-on" : undefined
-                              }
-                              aria-pressed={reacted.has(post.id)}
-                              onClick={() => toggleReact(post.id)}
-                            >
-                              {action} &nbsp; {count}
-                            </button>
-                            <span className="dot">·</span>
-                            <button
-                              type="button"
-                              onClick={() => toggleReplies(post.id)}
-                            >
-                              {repliesOpen ? "Hide replies" : replyLabel}
-                            </button>
-                            <span className="dot">·</span>
-                            <button
-                              type="button"
-                              aria-label={`Report ${post.name} response`}
-                              onClick={() => reportRef.current?.showModal()}
-                            >
-                              Report
-                            </button>
-                          </>
-                        )}
+                        <button
+                          type="button"
+                          className={post.reactedByMe ? "is-on" : undefined}
+                          aria-pressed={post.reactedByMe}
+                          disabled={busyPostId === post.id}
+                          onClick={() => void handleToggleReact(post)}
+                        >
+                          {action} &nbsp; {post.count}
+                        </button>
+                        <span className="dot">·</span>
+                        <button
+                          type="button"
+                          onClick={() => toggleReplies(post.id)}
+                        >
+                          {repliesOpen ? "Hide replies" : replyLabel}
+                        </button>
+                        <span className="dot">·</span>
+                        <button
+                          type="button"
+                          aria-label={`Report ${post.name} response`}
+                          onClick={() => openReport(post.id)}
+                        >
+                          Report
+                        </button>
                       </div>
-                      {!post.pending && repliesOpen ? (
+                      {repliesOpen ? (
                         <div className="reply-area">
-                          {post.replies.map((r, idx) => (
-                            <div className="reply" key={`${post.id}-r-${idx}`}>
+                          {post.replies.map((r) => (
+                            <div className="reply" key={r.id}>
                               <span className="reply-author">{r.name}</span>
                               <span className="reply-time">{r.time}</span>
                               <p>{r.text}</p>
                             </div>
                           ))}
-                          {isToday && mode === "member" ? (
+                          {isToday && isMember ? (
                             <ReplyForm
                               postId={post.id}
                               onSubmit={submitReply}
@@ -590,7 +765,7 @@ export default function SundayJournalPage() {
           </div>
         </div>
         <div className="footer-bottom">
-          <span>© 2026 The Way &nbsp; · &nbsp; Design concept</span>
+          <span>© 2026 The Way</span>
           <span>
             <button
               type="button"
@@ -603,55 +778,14 @@ export default function SundayJournalPage() {
         </div>
       </footer>
 
-      <dialog
-        ref={archiveRef}
-        aria-labelledby="sj-archive-title"
-        onClick={(e) => {
-          if (e.target === archiveRef.current) archiveRef.current.close();
+      <ArchiveDialog
+        dialogRef={archiveRef}
+        days={archiveDays}
+        onSelect={(dateIso) => {
+          archiveRef.current?.close();
+          goToDay(dateIso);
         }}
-      >
-        <div className="dialog-inner">
-          <div className="dialog-header">
-            <div>
-              <span className="quiet-label" style={{ color: "var(--rose)" }}>
-                Your reading library
-              </span>
-              <h3 id="sj-archive-title">Past days.</h3>
-            </div>
-            <button
-              className="dialog-close"
-              aria-label="Close"
-              type="button"
-              onClick={() => archiveRef.current?.close()}
-            >
-              ×
-            </button>
-          </div>
-          <p className="dialog-text">
-            One shared reading for each day. Return to any earlier word;
-            archived conversations are read-only.
-          </p>
-          <div>
-            {ARCHIVE_DAYS.map((day) => (
-              <button
-                key={day.key}
-                className="archive-day"
-                type="button"
-                onClick={() => {
-                  archiveRef.current?.close();
-                  loadDay(day.key);
-                }}
-              >
-                <span>
-                  <small>{day.archiveLabel}</small>
-                  <b>{day.archiveTitle}</b>
-                </span>
-                <span aria-hidden="true">↗</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      </dialog>
+      />
 
       <dialog
         ref={signRef}
@@ -681,27 +815,26 @@ export default function SundayJournalPage() {
             One email. No passwords to remember. No inboxes or direct messages.
             Only our daily reading and a public place to respond.
           </p>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              setSignMessage(
-                "Prototype only: no email has been sent. Production will use a real magic-link service.",
-              );
-            }}
-          >
+          <form onSubmit={(e) => void handleSignIn(e)}>
             <label className="quiet-label" htmlFor={emailId}>
               Email address
             </label>
             <input
               className="modal-field"
               id={emailId}
+              name="email"
               type="email"
               placeholder="you@example.com"
               autoComplete="email"
               required
             />
-            <button className="publish" style={{ width: "100%" }} type="submit">
-              Continue with email &nbsp; ↗
+            <button
+              className="publish"
+              style={{ width: "100%" }}
+              type="submit"
+              disabled={signBusy}
+            >
+              {signBusy ? "Sending…" : "Continue with email  ↗"}
             </button>
           </form>
           {signMessage ? (
@@ -753,8 +886,8 @@ export default function SundayJournalPage() {
               invitations, or private messaging.
             </li>
             <li>
-              New posts can be held for approval; reports are reviewed by
-              moderators.
+              Posts go live right away. Use Report if something needs a closer
+              look.
             </li>
           </ul>
         </div>
@@ -785,15 +918,34 @@ export default function SundayJournalPage() {
             </button>
           </div>
           <p className="dialog-text">
-            Reports go to a moderator for review. Choose the closest reason.
+            Reports are saved for review. Choose the closest reason.
           </p>
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              reportRef.current?.close();
-              announce(
-                "Report recorded in this preview · no backend connected",
-              );
+              void (async () => {
+                if (!profile || !reportPostId) return;
+                const reason = String(
+                  new FormData(e.currentTarget).get("reason") ?? "",
+                );
+                try {
+                  await createReport({
+                    reporterId: profile.id,
+                    postId: reportPostId,
+                    reason,
+                  });
+                  reportRef.current?.close();
+                  setReportPostId(null);
+                  announce("Thank you. Your report was received.");
+                } catch (err) {
+                  console.error(err);
+                  announce(
+                    err instanceof Error
+                      ? err.message
+                      : "Could not submit report.",
+                  );
+                }
+              })();
             }}
           >
             <label htmlFor={reportReasonId} className="quiet-label">
@@ -801,6 +953,7 @@ export default function SundayJournalPage() {
             </label>
             <select
               id={reportReasonId}
+              name="reason"
               required
               style={{
                 width: "100%",
@@ -825,47 +978,6 @@ export default function SundayJournalPage() {
         </div>
       </dialog>
 
-      <details
-        className="preview-switch"
-        open={previewOpen}
-        onToggle={(e) =>
-          setPreviewOpen((e.target as HTMLDetailsElement).open)
-        }
-      >
-        <summary>Design preview · change view</summary>
-        <div className="preview-buttons">
-          {(
-            [
-              ["member", "Member"],
-              ["guest", "Visitor"],
-              ["past", "Past day"],
-            ] as const
-          ).map(([value, label]) => (
-            <button
-              key={value}
-              type="button"
-              className={previewActive === value ? "active" : undefined}
-              onClick={() => {
-                if (value === "past") {
-                  setMode("member");
-                  loadDay("yesterday");
-                } else {
-                  if (!isToday) loadDay("today");
-                  setMode(value);
-                }
-                setPreviewOpen(false);
-              }}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-        <p>
-          These controls are for reviewing the concept, not part of the final
-          website.
-        </p>
-      </details>
-
       <div id="toast" role="status" hidden={!toast}>
         {toast}
       </div>
@@ -873,14 +985,78 @@ export default function SundayJournalPage() {
   );
 }
 
+function ArchiveDialog({
+  dialogRef,
+  days,
+  onSelect,
+}: {
+  dialogRef: RefObject<HTMLDialogElement | null>;
+  days: ArchiveDay[];
+  onSelect: (dateIso: string) => void;
+}) {
+  return (
+    <dialog
+      ref={dialogRef}
+      aria-labelledby="sj-archive-title"
+      onClick={(e) => {
+        if (e.target === dialogRef.current) dialogRef.current?.close();
+      }}
+    >
+      <div className="dialog-inner">
+        <div className="dialog-header">
+          <div>
+            <span className="quiet-label" style={{ color: "var(--rose)" }}>
+              Your reading library
+            </span>
+            <h3 id="sj-archive-title">Past days.</h3>
+          </div>
+          <button
+            className="dialog-close"
+            aria-label="Close"
+            type="button"
+            onClick={() => dialogRef.current?.close()}
+          >
+            ×
+          </button>
+        </div>
+        <p className="dialog-text">
+          One shared reading for each day. Return to any earlier word;
+          archived conversations are read-only.
+        </p>
+        <div>
+          {days.length === 0 ? (
+            <p className="meta-fine">No past days yet.</p>
+          ) : (
+            days.map((day) => (
+              <button
+                key={day.dateIso}
+                className="archive-day"
+                type="button"
+                onClick={() => onSelect(day.dateIso)}
+              >
+                <span>
+                  <small>{day.archiveLabel}</small>
+                  <b>{day.archiveTitle}</b>
+                </span>
+                <span aria-hidden="true">↗</span>
+              </button>
+            ))
+          )}
+        </div>
+      </div>
+    </dialog>
+  );
+}
+
 function ReplyForm({
   postId,
   onSubmit,
 }: {
-  postId: number;
-  onSubmit: (postId: number, text: string) => void;
+  postId: string;
+  onSubmit: (postId: string, text: string) => void | Promise<void>;
 }) {
   const [text, setText] = useState("");
+  const [busy, setBusy] = useState(false);
   const id = useId();
 
   return (
@@ -889,9 +1065,11 @@ function ReplyForm({
       onSubmit={(e) => {
         e.preventDefault();
         const value = text.trim();
-        if (!value) return;
-        onSubmit(postId, value);
-        setText("");
+        if (!value || busy) return;
+        setBusy(true);
+        void Promise.resolve(onSubmit(postId, value))
+          .then(() => setText(""))
+          .finally(() => setBusy(false));
       }}
     >
       <label className="sr-only" htmlFor={id}>
@@ -907,7 +1085,9 @@ function ReplyForm({
       />
       <div className="reply-helper">
         <span>Public reply · 240 characters max</span>
-        <button type="submit">Post reply</button>
+        <button type="submit" disabled={busy}>
+          {busy ? "Posting…" : "Post reply"}
+        </button>
       </div>
     </form>
   );

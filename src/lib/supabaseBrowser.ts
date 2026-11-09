@@ -8,7 +8,7 @@ const DEFAULT_SUPABASE_URL = "https://gjwgxkfrixknjczmlsef.supabase.co";
 const DEFAULT_SUPABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdqd2d4a2ZyaXhrbmpjem1sc2VmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxNzA1MDgsImV4cCI6MjA5NDc0NjUwOH0.KXYXCZhNNmV5YINwUuxs1X7UvjbiGyIck-2J8ws_6Ww";
 
-const url =
+export const supabaseUrl =
   import.meta.env.VITE_SUPABASE_URL ||
   import.meta.env.NEXT_PUBLIC_SUPABASE_URL ||
   DEFAULT_SUPABASE_URL;
@@ -18,8 +18,19 @@ const anonKey =
   import.meta.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
   DEFAULT_SUPABASE_ANON_KEY;
 
-/** Browser client for Edge Functions (waitlist) and public reads. */
-export const supabaseBrowser: SupabaseClient = createClient(url, anonKey);
+/** Browser client for Auth, Edge Functions, and public reads. PKCE avoids HashRouter token clashes. */
+export const supabaseBrowser: SupabaseClient = createClient(
+  supabaseUrl,
+  anonKey,
+  {
+    auth: {
+      flowType: "pkce",
+      detectSessionInUrl: true,
+      persistSession: true,
+      autoRefreshToken: true,
+    },
+  },
+);
 
 /**
  * Live waitlist size via Edge Function GET (service-role count). Falls back to REST count if needed.
@@ -27,7 +38,7 @@ export const supabaseBrowser: SupabaseClient = createClient(url, anonKey);
  */
 export async function fetchWaitlistCount(): Promise<number | null> {
   try {
-    const res = await fetch(`${url}/functions/v1/join-waitlist`, {
+    const res = await fetch(`${supabaseUrl}/functions/v1/join-waitlist`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${anonKey}`,
