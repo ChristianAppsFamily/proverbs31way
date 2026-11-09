@@ -581,7 +581,7 @@ export default function SundayJournalPage() {
           </div>
           <div>
             <span className="quiet-label" style={{ color: "#f2dfe7" }}>
-              ONE WORD. ONE DAY. ONE COMMUNITY.
+              A HOME FOR THE DAUGHTERS OF GOD
             </span>
             <p>
               A gentle daily rhythm of Scripture, reflection, and public prayer.

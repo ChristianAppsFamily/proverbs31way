@@ -1,5 +1,5 @@
 /**
- * The Way: waitlist marketing landing — Direction 02 visual language.
+ * The Way: waitlist marketing landing. Direction 02 visual language.
  * Conversion funnel aligned with the Sunday Journal product direction.
  */
 
@@ -65,26 +65,26 @@ const journalBeats = [
   {
     num: "01",
     name: "The Word",
-    desc: "One shared Scripture for the day — given space to land before anything else.",
+    desc: "We start with Scripture. Same passage for everyone, with room to sit with it.",
   },
   {
     num: "02",
     name: "Today's Devotional",
-    desc: "A short reflection and a question to carry into the rest of your day.",
+    desc: "A short reading and one question you can take into the rest of your day.",
   },
   {
     num: "03",
     name: "The Gathering",
-    desc: "A public place to reflect, ask for prayer, and encourage one another.",
+    desc: "Share what stirred you, or ask for prayer. Other women can respond with care.",
   },
 ];
 
 const foundingBenefits = [
-  "Lifetime Founding Sister recognition inside the community",
-  "Free first year, no subscription, ever",
-  "Shape the daily gathering from day one",
-  "First access when the doors open",
-  "Name inscribed in the opening prayer scroll",
+  "You'll be known as a Founding Sister",
+  "Your first year is free",
+  "Help shape The Way while it's still being built",
+  "You're among the first through the door when we open",
+  "Your name is written into our opening prayer",
 ];
 
 function CheckIcon() {
@@ -326,9 +326,9 @@ export default function LandingV1() {
 
             <ScrollFade className="animate-delay-2">
               <p className="ld2-body text-lg md:text-xl max-w-lg mb-8">
-                Daily scripture. A thoughtful reflection. One shared gathering
-                for the woman who wants more than a devotional app: she wants a
-                community.
+                A little Scripture each day, room to sit with it, and sisters
+                who will walk with you. Not another checklist. A place to
+                belong.
               </p>
             </ScrollFade>
 
@@ -394,16 +394,16 @@ export default function LandingV1() {
             </ScrollFade>
             <ScrollFade className="animate-delay-1">
               <h2 className="ld2-display text-[32px] md:text-[42px] leading-[1.12] mb-6">
-                Walking in faith can sometimes feel like you're the only one.
+                Some days faith feels lonely, even when you love the Lord.
               </h2>
             </ScrollFade>
             <ScrollFade className="animate-delay-2">
               <div className="space-y-4">
                 {[
-                  "You read your Bible alone at 6am while the house sleeps.",
-                  "You have questions you're afraid to ask in your small group.",
-                  "You crave depth but find surface-level chats instead.",
-                  "You wonder if anyone else feels this way.",
+                  "You open your Bible before anyone else is awake.",
+                  "You have questions you don't quite feel safe asking out loud.",
+                  "You want something deeper than a quick comment thread.",
+                  "And you wonder if other women feel that same quiet ache.",
                 ].map((text) => (
                   <p
                     key={text}
@@ -459,23 +459,23 @@ export default function LandingV1() {
               </ScrollFade>
               <ScrollFade className="animate-delay-2">
                 <h2 className="ld2-display text-[32px] md:text-[42px] leading-[1.12] mb-6">
-                  A home for women who refuse to settle for shallow faith.
+                  A simple daily rhythm for women who want to grow together.
                 </h2>
               </ScrollFade>
               <ScrollFade className="animate-delay-3">
                 <div className="space-y-5">
                   {[
                     {
-                      title: "Scripture that meets you where you are.",
-                      desc: "Not a verse of the day you scroll past. A daily word that lands in your chest and stays there.",
+                      title: "Scripture you can sit with.",
+                      desc: "Not something to skim and forget. A word for the day that has room to land.",
                     },
                     {
-                      title: "A reflection worth sitting with.",
-                      desc: "A short, editorial devotion and a question to carry — calm enough for a quiet morning, honest enough for a hard one.",
+                      title: "A short reading, then one question.",
+                      desc: "Something gentle enough for a quiet morning, and honest enough for a hard one.",
                     },
                     {
-                      title: "One gathering. Shared out loud.",
-                      desc: "Public reflections and prayer requests in one conversation. Every voice is public. Every response begins with kindness.",
+                      title: "A place to share out loud.",
+                      desc: "Write what stirred you, or ask for prayer. Other sisters can answer with kindness.",
                     },
                   ].map((item) => (
                     <div key={item.title}>
@@ -525,7 +525,7 @@ export default function LandingV1() {
 
           <div className="ld2-rule" aria-hidden />
 
-          <p className="ld2-eyebrow mb-0">ECCLESIASTES 4:9–10</p>
+          <p className="ld2-eyebrow mb-0">ECCLESIASTES 4:9-10</p>
         </div>
       </section>
 
@@ -536,7 +536,7 @@ export default function LandingV1() {
             <div className="text-center mb-14">
               <SectionEyebrow>INSIDE TODAY&apos;S READING</SectionEyebrow>
               <h2 className="ld2-display text-[32px] md:text-[42px] leading-[1.12]">
-                One word. One day. One community.
+                Here&apos;s what a day looks like.
               </h2>
             </div>
           </ScrollFade>
@@ -567,7 +567,7 @@ export default function LandingV1() {
         <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-center">
           <div>
             <ScrollFade>
-              <SectionEyebrow>LIMITED FOUNDING MEMBERSHIP</SectionEyebrow>
+              <SectionEyebrow>FOUNDING SISTERS</SectionEyebrow>
             </ScrollFade>
             <ScrollFade className="animate-delay-1">
               <h2 className="ld2-display text-[32px] md:text-[42px] leading-[1.12] mb-6">
@@ -576,10 +576,10 @@ export default function LandingV1() {
             </ScrollFade>
             <ScrollFade className="animate-delay-2">
               <p className="ld2-body text-base mb-8">
-                The first 500 women through the door become Founding Sisters,
-                forever recognized inside The Way. Your name on the scroll. Your
-                voice shaping what we become. No subscription. No catch. Just
-                first access to a daily home built for you.
+                The first 500 women who join become Founding Sisters. You help
+                shape this from the beginning, and you&apos;ll be remembered for
+                it. Joining the waitlist is free. When the doors open, you get
+                first access.
               </p>
             </ScrollFade>
             <ScrollFade className="animate-delay-3">
@@ -648,9 +648,9 @@ export default function LandingV1() {
               Your sisters are waiting.
             </h2>
           </ScrollFade>
-          <ScrollFade className="animate-delay-2">
+            <ScrollFade className="animate-delay-2">
             <p className="ld2-body text-lg mb-10 max-w-md mx-auto">
-              Enter your email. Join the waitlist. Be among the first 500
+              Leave your email and save your spot as one of the first 500
               Founding Sisters.
             </p>
           </ScrollFade>
@@ -729,7 +729,7 @@ export default function LandingV1() {
                 className="mt-3 text-[10px] font-bold tracking-[0.18em] uppercase"
                 style={{ color: "#f2dfe7", fontFamily: "var(--sans)" }}
               >
-                ONE WORD. ONE DAY. ONE COMMUNITY.
+                Scripture, reflection, and sisters beside you.
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
