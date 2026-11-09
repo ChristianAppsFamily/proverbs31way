@@ -11,12 +11,52 @@ import "@/styles/landing-d2.css";
 
 const FOUNDING_SPOTS_TOTAL = 500;
 
-/** Replace these paths when new hero photography is ready. */
 const HERO_SLIDES = [
   { src: "/images/v1-hero.jpg", alt: "Woman in warm natural light" },
-  { src: "/images/v1-warm.jpg", alt: "Warm portrait in soft light" },
-  { src: "/images/v1-reading.jpg", alt: "Woman reading Scripture" },
-  { src: "/images/v1-sister.jpg", alt: "Sister in quiet reflection" },
+  {
+    src: "/images/hero-carousel-01.jpg",
+    alt: "Woman raising her arms toward the sky in a sunlit field",
+  },
+  {
+    src: "/images/hero-carousel-02.jpg",
+    alt: "Woman standing alone on white sand dunes under a wide sky",
+  },
+  {
+    src: "/images/hero-carousel-03.jpg",
+    alt: "Woman reading Scripture outdoors on a rock in soft light",
+  },
+  {
+    src: "/images/hero-carousel-04.jpg",
+    alt: "Woman in quiet prayer outdoors with eyes closed",
+  },
+  {
+    src: "/images/hero-carousel-05.jpg",
+    alt: "Woman in a sunlit alley looking upward in thought",
+  },
+  {
+    src: "/images/hero-carousel-06.jpg",
+    alt: "Hands resting on a leather-bound Bible",
+  },
+  {
+    src: "/images/hero-carousel-07.jpg",
+    alt: "Woman in a wildflower field holding flowers toward the sky",
+  },
+  {
+    src: "/images/hero-carousel-08.jpg",
+    alt: "Woman meditating by a still lake in the forest",
+  },
+  {
+    src: "/images/hero-carousel-09.jpg",
+    alt: "Woman reading an open Bible outdoors",
+  },
+  {
+    src: "/images/hero-carousel-10.jpg",
+    alt: "Woman with a Bible resting quietly outdoors",
+  },
+  {
+    src: "/images/hero-carousel-11.jpg",
+    alt: "Woman praying before a mountain landscape",
+  },
 ] as const;
 
 const HERO_ROTATE_MS = 6500;
@@ -308,10 +348,10 @@ export default function LandingV1() {
               <div className="flex items-center gap-3">
                 <div className="flex -space-x-2">
                   {[
-                    "/images/v1-sister.jpg",
-                    "/images/v1-warm.jpg",
-                    "/images/v1-diverse.jpg",
-                    "/images/v1-reading.jpg",
+                    "/images/hero-carousel-04.jpg",
+                    "/images/hero-carousel-03.jpg",
+                    "/images/hero-carousel-08.jpg",
+                    "/images/hero-carousel-01.jpg",
                   ].map((src) => (
                     <div
                       key={src}
