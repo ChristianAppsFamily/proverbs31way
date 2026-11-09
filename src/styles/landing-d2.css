@@ -1,0 +1,187 @@
+/* Direction 02 tokens for the waitlist marketing landing only */
+.landing-d2 {
+  --ink: #242027;
+  --muted: #706a72;
+  --rose: #75475b;
+  --rose-2: #9c7082;
+  --line: #d8d2d6;
+  --pale: #f9f7f8;
+  --canvas: #fdfcfd;
+  --panel: #f0ebee;
+  --white: #ffffff;
+  --serif: "EB Garamond", "Baskerville", "Iowan Old Style", Georgia, serif;
+  --sans: "Lato", "Avenir Next", Arial, sans-serif;
+
+  color: var(--ink);
+  background: var(--canvas);
+  font-family: var(--sans);
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.landing-d2 *,
+.landing-d2 *::before,
+.landing-d2 *::after {
+  box-sizing: border-box;
+}
+
+.landing-d2 .ld2-eyebrow {
+  margin: 0 0 1rem;
+  font-family: var(--sans);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.21em;
+  text-transform: uppercase;
+  color: var(--rose);
+  line-height: 1.5;
+}
+
+.landing-d2 .ld2-display {
+  font-family: var(--serif);
+  font-weight: 400;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+}
+
+.landing-d2 .ld2-body {
+  font-family: var(--sans);
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.landing-d2 .ld2-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50px;
+  padding: 17px 25px;
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: var(--white);
+  font-family: var(--sans);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.landing-d2 .ld2-btn:hover {
+  background: var(--rose);
+  border-color: var(--rose);
+  color: var(--white);
+}
+
+.landing-d2 .ld2-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.landing-d2 .ld2-btn-ghost {
+  background: transparent;
+  color: var(--ink);
+  border-color: transparent;
+  border-bottom: 1px solid var(--ink);
+  border-radius: 0;
+  min-height: auto;
+  padding: 8px 0;
+  letter-spacing: 0.16em;
+}
+
+.landing-d2 .ld2-btn-ghost:hover {
+  color: var(--rose);
+  border-bottom-color: var(--rose);
+  background: transparent;
+}
+
+.landing-d2 .ld2-input {
+  width: 100%;
+  min-height: 50px;
+  padding: 14px 0;
+  border: 0;
+  border-bottom: 1px solid var(--ink);
+  border-radius: 0;
+  background: transparent;
+  font-family: var(--sans);
+  font-size: 16px;
+  color: var(--ink);
+  outline: none;
+}
+
+.landing-d2 .ld2-input::placeholder {
+  color: #8c818a;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 20px;
+}
+
+.landing-d2 .ld2-input:focus {
+  border-bottom-color: var(--rose);
+}
+
+.landing-d2 .ld2-rule {
+  width: 48px;
+  height: 1px;
+  background: var(--rose);
+  margin: 24px auto;
+}
+
+.landing-d2 .ld2-panel {
+  background: var(--panel);
+}
+
+.landing-d2 .ld2-surface {
+  background: var(--pale);
+}
+
+.landing-d2 .ld2-footer {
+  background: #222026;
+  color: #f7f3f6;
+}
+
+.landing-d2 .ld2-footer a,
+.landing-d2 .ld2-footer button {
+  color: #e8d8df;
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+  font-size: 10px;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.landing-d2 .ld2-img {
+  width: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.landing-d2 .ld2-beat {
+  border-top: 1px solid var(--line);
+  padding: 28px 0;
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.landing-d2 .ld2-beat-num {
+  font-family: var(--serif);
+  font-size: 42px;
+  line-height: 1;
+  color: var(--line);
+  letter-spacing: -0.04em;
+}
+
+.landing-d2 a:focus-visible,
+.landing-d2 button:focus-visible,
+.landing-d2 input:focus-visible {
+  outline: 2px solid var(--rose);
+  outline-offset: 4px;
+}
