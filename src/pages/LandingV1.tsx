@@ -11,6 +11,16 @@ import "@/styles/landing-d2.css";
 
 const FOUNDING_SPOTS_TOTAL = 500;
 
+/** Replace these paths when new hero photography is ready. */
+const HERO_SLIDES = [
+  { src: "/images/v1-hero.jpg", alt: "Woman in warm natural light" },
+  { src: "/images/v1-warm.jpg", alt: "Warm portrait in soft light" },
+  { src: "/images/v1-reading.jpg", alt: "Woman reading Scripture" },
+  { src: "/images/v1-sister.jpg", alt: "Sister in quiet reflection" },
+] as const;
+
+const HERO_ROTATE_MS = 6500;
+
 const journalBeats = [
   {
     num: "01",
@@ -124,6 +134,7 @@ export default function LandingV1() {
   const [waitlistStatus, setWaitlistStatus] = useState<WaitlistStatus>("idle");
   const [waitlistError, setWaitlistError] = useState("");
   const [waitlistCount, setWaitlistCount] = useState<number | null>(null);
+  const [heroIndex, setHeroIndex] = useState(0);
 
   const refreshWaitlistCount = useCallback(async () => {
     const n = await fetchWaitlistCount();
@@ -148,6 +159,16 @@ export default function LandingV1() {
       supabaseBrowser.removeChannel(channel);
     };
   }, [refreshWaitlistCount]);
+
+  useEffect(() => {
+    if (HERO_SLIDES.length < 2) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const id = window.setInterval(() => {
+      setHeroIndex((i) => (i + 1) % HERO_SLIDES.length);
+    }, HERO_ROTATE_MS);
+    return () => window.clearInterval(id);
+  }, []);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -212,19 +233,41 @@ export default function LandingV1() {
 
       {/* Hero */}
       <section className="relative min-h-[100dvh] flex items-center overflow-hidden">
-        <div className="absolute inset-0">
-          <img
-            src="/images/v1-hero.jpg"
-            alt="Woman in warm natural light"
-            className="ld2-img w-full h-full object-[center_30%]"
-          />
-          <div
-            className="absolute inset-0"
-            style={{
-              background:
-                "linear-gradient(90deg, rgba(253,252,253,0.97) 0%, rgba(253,252,253,0.88) 45%, rgba(253,252,253,0.35) 72%, rgba(253,252,253,0.08) 100%)",
-            }}
-          />
+        <div className="ld2-hero-carousel" aria-hidden={false}>
+          {HERO_SLIDES.map((slide, index) => (
+            <div
+              key={slide.src}
+              className={`ld2-hero-slide${index === heroIndex ? " is-active" : ""}`}
+              aria-hidden={index !== heroIndex}
+            >
+              <img
+                src={slide.src}
+                alt={index === heroIndex ? slide.alt : ""}
+                loading={index === 0 ? "eager" : "lazy"}
+                decoding="async"
+              />
+            </div>
+          ))}
+          <div className="ld2-hero-veil" aria-hidden />
+          {HERO_SLIDES.length > 1 ? (
+            <div
+              className="ld2-hero-dots"
+              role="tablist"
+              aria-label="Hero images"
+            >
+              {HERO_SLIDES.map((slide, index) => (
+                <button
+                  key={slide.src}
+                  type="button"
+                  role="tab"
+                  aria-selected={index === heroIndex}
+                  aria-label={`Show image ${index + 1}`}
+                  className={`ld2-hero-dot${index === heroIndex ? " is-active" : ""}`}
+                  onClick={() => setHeroIndex(index)}
+                />
+              ))}
+            </div>
+          ) : null}
         </div>
 
         <div className="relative z-10 w-full px-6 md:px-10 lg:px-[8vw] py-20">
@@ -258,9 +301,6 @@ export default function LandingV1() {
                 >
                   Join the Waitlist
                 </button>
-                <Link to="/today" className="ld2-btn-ghost ld2-btn">
-                  Peek inside today's reading →
-                </Link>
               </div>
             </ScrollFade>
 
@@ -478,13 +518,6 @@ export default function LandingV1() {
                 </div>
               </ScrollFade>
             ))}
-            <ScrollFade className="animate-delay-4">
-              <div className="pt-8">
-                <Link to="/today" className="ld2-btn-ghost ld2-btn">
-                  Preview the Sunday Journal →
-                </Link>
-              </div>
-            </ScrollFade>
           </div>
         </div>
       </section>
@@ -673,9 +706,6 @@ export default function LandingV1() {
               <button type="button" onClick={() => scrollToSection("waitlist")}>
                 Join
               </button>
-              <Link to="/today" style={{ textDecoration: "underline" }}>
-                Today
-              </Link>
               <a href="mailto:christianappempire@gmail.com">Contact</a>
             </div>
           </div>
