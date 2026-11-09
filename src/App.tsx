@@ -6,6 +6,7 @@ import TablePage from "@/pages/Table";
 import WellPage from "@/pages/Well";
 import LetterPage from "@/pages/Letter";
 import SanctuaryPage from "@/pages/Sanctuary";
+import SundayJournalPage from "@/pages/SundayJournal";
 import Login from "@/pages/Login";
 import NotFound from "@/pages/NotFound";
 
@@ -14,6 +15,8 @@ function App() {
     <Routes>
       <Route path="/" element={<LandingV1 />} />
       <Route path="/home" element={<HomePage />} />
+      <Route path="/today" element={<SundayJournalPage />} />
+      <Route path="/readings/:date" element={<SundayJournalPage />} />
       <Route path="/garden" element={<GardenPage />} />
       <Route path="/table" element={<TablePage />} />
       <Route path="/well" element={<WellPage />} />
