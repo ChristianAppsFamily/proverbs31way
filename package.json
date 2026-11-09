@@ -16,7 +16,9 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
-    "generate-favicons": "node scripts/generate-favicons.mjs"
+    "generate-favicons": "node scripts/generate-favicons.mjs",
+    "golive:auth": "node scripts/configure-auth-golive.mjs",
+    "golive:vercel-env": "node scripts/set-vercel-supabase-env.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.965.0",

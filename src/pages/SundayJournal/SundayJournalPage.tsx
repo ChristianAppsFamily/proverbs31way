@@ -15,9 +15,10 @@ import {
   fetchArchiveDays,
   fetchEditionByDate,
   fetchGatheringPosts,
-  requestMagicLink,
+  requestSignInCode,
   signOut,
   toggleReaction,
+  verifySignInCode,
 } from "@/lib/sundayJournal/api";
 import { isIsoDate, todayIso } from "@/lib/sundayJournal/dates";
 import type {
@@ -52,6 +53,9 @@ export default function SundayJournalPage() {
   const [toast, setToast] = useState<string | null>(null);
   const [signMessage, setSignMessage] = useState<string | null>(null);
   const [signBusy, setSignBusy] = useState(false);
+  const [signEmail, setSignEmail] = useState("");
+  const [signStep, setSignStep] = useState<"email" | "code">("email");
+  const codeId = useId();
   const [reportPostId, setReportPostId] = useState<string | null>(null);
   const [busyPostId, setBusyPostId] = useState<string | null>(null);
 
@@ -152,6 +156,8 @@ export default function SundayJournalPage() {
 
   const openSignIn = () => {
     setSignMessage(null);
+    setSignStep("email");
+    setSignEmail("");
     signRef.current?.showModal();
   };
 
@@ -263,19 +269,34 @@ export default function SundayJournalPage() {
   const handleSignIn = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = e.currentTarget;
-    const email = String(new FormData(form).get("email") ?? "").trim();
-    if (!email) return;
+    const data = new FormData(form);
     setSignBusy(true);
     setSignMessage(null);
     try {
-      await requestMagicLink(email);
-      setSignMessage("Check your email for a sign-in link. It may take a minute.");
+      if (signStep === "email") {
+        const email = String(data.get("email") ?? "").trim();
+        if (!email) return;
+        await requestSignInCode(email);
+        setSignEmail(email);
+        setSignStep("code");
+        setSignMessage(
+          "We sent a 6-digit code to your email. Enter it below to join.",
+        );
+      } else {
+        const token = String(data.get("code") ?? "").trim();
+        if (!token) return;
+        await verifySignInCode(signEmail, token);
+        signRef.current?.close();
+        setSignStep("email");
+        setSignMessage(null);
+        announce("Welcome. You’re signed in.");
+      }
     } catch (err) {
       console.error(err);
       setSignMessage(
         err instanceof Error
           ? err.message
-          : "Could not send sign-in email. Please try again.",
+          : "Could not complete sign-in. Please try again.",
       );
     } finally {
       setSignBusy(false);
@@ -812,31 +833,73 @@ export default function SundayJournalPage() {
             </button>
           </div>
           <p className="dialog-text">
-            One email. No passwords to remember. No inboxes or direct messages.
-            Only our daily reading and a public place to respond.
+            {signStep === "email"
+              ? "One email. No passwords to remember. No inboxes or direct messages. Only our daily reading and a public place to respond."
+              : `Enter the code we sent to ${signEmail}.`}
           </p>
           <form onSubmit={(e) => void handleSignIn(e)}>
-            <label className="quiet-label" htmlFor={emailId}>
-              Email address
-            </label>
-            <input
-              className="modal-field"
-              id={emailId}
-              name="email"
-              type="email"
-              placeholder="you@example.com"
-              autoComplete="email"
-              required
-            />
+            {signStep === "email" ? (
+              <>
+                <label className="quiet-label" htmlFor={emailId}>
+                  Email address
+                </label>
+                <input
+                  className="modal-field"
+                  id={emailId}
+                  name="email"
+                  type="email"
+                  placeholder="you@example.com"
+                  autoComplete="email"
+                  required
+                />
+              </>
+            ) : (
+              <>
+                <label className="quiet-label" htmlFor={codeId}>
+                  6-digit code
+                </label>
+                <input
+                  className="modal-field"
+                  id={codeId}
+                  name="code"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  autoComplete="one-time-code"
+                  placeholder="123456"
+                  maxLength={8}
+                  required
+                />
+              </>
+            )}
             <button
               className="publish"
               style={{ width: "100%" }}
               type="submit"
               disabled={signBusy}
             >
-              {signBusy ? "Sending…" : "Continue with email  ↗"}
+              {signBusy
+                ? signStep === "email"
+                  ? "Sending…"
+                  : "Checking…"
+                : signStep === "email"
+                  ? "Continue with email  ↗"
+                  : "Join the gathering  ↗"}
             </button>
           </form>
+          {signStep === "code" ? (
+            <p className="meta-fine" style={{ marginTop: "14px" }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setSignStep("email");
+                  setSignMessage(null);
+                }}
+              >
+                Use a different email
+              </button>
+            </p>
+          ) : null}
           {signMessage ? (
             <p className="dialog-message" aria-live="polite">
               {signMessage}

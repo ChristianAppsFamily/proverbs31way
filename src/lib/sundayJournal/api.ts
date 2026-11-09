@@ -255,7 +255,8 @@ export async function createReport(input: {
   if (error) throw error;
 }
 
-export async function requestMagicLink(email: string): Promise<void> {
+/** Send a one-time email code (and magic link). Code entry works even if Site URL is misconfigured. */
+export async function requestSignInCode(email: string): Promise<void> {
   const redirectTo = `${window.location.origin}/`;
   const { error } = await supabaseBrowser.auth.signInWithOtp({
     email: email.trim().toLowerCase(),
@@ -263,6 +264,23 @@ export async function requestMagicLink(email: string): Promise<void> {
       emailRedirectTo: redirectTo,
       shouldCreateUser: true,
     },
+  });
+  if (error) throw error;
+}
+
+/** @deprecated Prefer requestSignInCode — kept as an alias for older call sites. */
+export async function requestMagicLink(email: string): Promise<void> {
+  return requestSignInCode(email);
+}
+
+export async function verifySignInCode(
+  email: string,
+  token: string,
+): Promise<void> {
+  const { error } = await supabaseBrowser.auth.verifyOtp({
+    email: email.trim().toLowerCase(),
+    token: token.trim(),
+    type: "email",
   });
   if (error) throw error;
 }
