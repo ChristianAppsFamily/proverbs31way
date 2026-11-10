@@ -1,6 +1,6 @@
 /**
- * Direction 2 favicons: ink circle + serif italic "w." (rose period).
- * Colors match landing-d2 / sunday-journal tokens (--ink, --pale, --rose).
+ * Direction 2 favicons: white circle + serif italic "w." in brand ink (#242027).
+ * Ink is the dark navy-charcoal used across the landing and journal.
  */
 import sharp from "sharp";
 import { dirname, join } from "path";
@@ -12,14 +12,14 @@ const root = join(__dirname, "..");
 const outDir = join(root, "public");
 
 const INK = "#242027";
-const PALE = "#f9f7f8";
-const ROSE = "#75475b";
+const WHITE = "#ffffff";
 
 /** Circular mark with transparent corners (browser tab icons). */
 function markSvg() {
   return Buffer.from(`<?xml version="1.0" encoding="UTF-8"?>
 <svg width="512" height="512" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="32" cy="32" r="32" fill="${INK}"/>
+  <circle cx="32" cy="32" r="32" fill="${WHITE}"/>
+  <circle cx="32" cy="32" r="30.5" fill="none" stroke="${INK}" stroke-width="1.25" opacity="0.18"/>
   <text
     x="30.5"
     y="42.5"
@@ -28,9 +28,9 @@ function markSvg() {
     font-style="italic"
     font-weight="400"
     font-size="34"
-    fill="${PALE}"
+    fill="${INK}"
   >w</text>
-  <circle cx="45.8" cy="41.4" r="2.85" fill="${ROSE}"/>
+  <circle cx="45.8" cy="41.4" r="2.85" fill="${INK}"/>
 </svg>`);
 }
 
@@ -38,7 +38,7 @@ function markSvg() {
 function appleSvg() {
   return Buffer.from(`<?xml version="1.0" encoding="UTF-8"?>
 <svg width="180" height="180" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-  <rect width="64" height="64" fill="${INK}"/>
+  <rect width="64" height="64" fill="${WHITE}"/>
   <text
     x="30.5"
     y="42.5"
@@ -47,15 +47,16 @@ function appleSvg() {
     font-style="italic"
     font-weight="400"
     font-size="34"
-    fill="${PALE}"
+    fill="${INK}"
   >w</text>
-  <circle cx="45.8" cy="41.4" r="2.85" fill="${ROSE}"/>
+  <circle cx="45.8" cy="41.4" r="2.85" fill="${INK}"/>
 </svg>`);
 }
 
 const svgFavicon = `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <circle cx="32" cy="32" r="32" fill="${INK}"/>
+  <circle cx="32" cy="32" r="32" fill="${WHITE}"/>
+  <circle cx="32" cy="32" r="30.5" fill="none" stroke="${INK}" stroke-width="1.25" opacity="0.18"/>
   <text
     x="30.5"
     y="42.5"
@@ -64,9 +65,9 @@ const svgFavicon = `<?xml version="1.0" encoding="UTF-8"?>
     font-style="italic"
     font-weight="400"
     font-size="34"
-    fill="${PALE}"
+    fill="${INK}"
   >w</text>
-  <circle cx="45.8" cy="41.4" r="2.85" fill="${ROSE}"/>
+  <circle cx="45.8" cy="41.4" r="2.85" fill="${INK}"/>
 </svg>
 `;
 
