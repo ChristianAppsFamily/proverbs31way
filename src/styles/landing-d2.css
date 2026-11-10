@@ -115,6 +115,18 @@
   background: transparent;
 }
 
+.landing-d2 .ld2-btn-outline {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--ink);
+}
+
+.landing-d2 .ld2-btn-outline:hover {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--white);
+}
+
 .landing-d2 .ld2-input {
   width: 100%;
   min-height: 50px;

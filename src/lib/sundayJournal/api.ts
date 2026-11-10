@@ -289,3 +289,25 @@ export async function signOut(): Promise<void> {
   const { error } = await supabaseBrowser.auth.signOut();
   if (error) throw error;
 }
+
+/** Permanently delete the signed-in member (Auth user + cascaded profile/posts). */
+export async function deleteAccount(): Promise<void> {
+  const {
+    data: { session },
+  } = await supabaseBrowser.auth.getSession();
+  if (!session?.access_token) {
+    throw new Error("You must be signed in to delete your account.");
+  }
+
+  const { data, error } = await supabaseBrowser.functions.invoke(
+    "delete-account",
+    { method: "POST" },
+  );
+
+  if (error) throw error;
+  if (data && typeof data === "object" && "error" in data) {
+    throw new Error(String((data as { error: string }).error));
+  }
+
+  await supabaseBrowser.auth.signOut();
+}

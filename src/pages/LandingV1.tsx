@@ -336,13 +336,15 @@ export default function LandingV1() {
 
             <ScrollFade className="animate-delay-3">
               <div className="flex flex-wrap items-center gap-5 mb-8">
-                <button
-                  type="button"
-                  className="ld2-btn"
-                  onClick={() => scrollToSection("waitlist")}
+                <Link to="/today?auth=signup" className="ld2-btn">
+                  Sign up
+                </Link>
+                <Link
+                  to="/today?auth=signin"
+                  className="ld2-btn ld2-btn-outline"
                 >
-                  Join the Waitlist
-                </button>
+                  Sign in
+                </Link>
               </div>
             </ScrollFade>
 
@@ -745,9 +747,8 @@ export default function LandingV1() {
               <button type="button" onClick={() => scrollToSection("inside")}>
                 Inside
               </button>
-              <button type="button" onClick={() => scrollToSection("waitlist")}>
-                Join
-              </button>
+              <Link to="/today?auth=signup">Sign up</Link>
+              <Link to="/today?auth=signin">Sign in</Link>
               <a href="mailto:christianappempire@gmail.com">Contact</a>
             </div>
           </div>

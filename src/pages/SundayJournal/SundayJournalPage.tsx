@@ -6,12 +6,13 @@ import {
   useState,
 } from "react";
 import type { FormEvent, RefObject } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router";
 import "@/styles/sunday-journal.css";
 import {
   createPost,
   createReply,
   createReport,
+  deleteAccount,
   fetchArchiveDays,
   fetchEditionByDate,
   fetchGatheringPosts,
@@ -29,11 +30,14 @@ import type {
   PostKind,
 } from "@/lib/sundayJournal/types";
 import { useAuth } from "@/providers/AuthProvider";
+import { useTheme } from "@/providers/ThemeProvider";
 
 export default function SundayJournalPage() {
   const { date } = useParams<{ date?: string }>();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { user, profile, loading: authLoading } = useAuth();
+  const { theme, setTheme } = useTheme();
 
   const requestedDate = date && isIsoDate(date) ? date : undefined;
   const isTodayRoute = !requestedDate;
@@ -55,6 +59,8 @@ export default function SundayJournalPage() {
   const [signBusy, setSignBusy] = useState(false);
   const [signEmail, setSignEmail] = useState("");
   const [signStep, setSignStep] = useState<"email" | "code">("email");
+  const [authIntent, setAuthIntent] = useState<"signup" | "signin">("signin");
+  const [deleteBusy, setDeleteBusy] = useState(false);
   const codeId = useId();
   const [reportPostId, setReportPostId] = useState<string | null>(null);
   const [busyPostId, setBusyPostId] = useState<string | null>(null);
@@ -63,6 +69,7 @@ export default function SundayJournalPage() {
   const signRef = useRef<HTMLDialogElement>(null);
   const rulesRef = useRef<HTMLDialogElement>(null);
   const reportRef = useRef<HTMLDialogElement>(null);
+  const settingsRef = useRef<HTMLDialogElement>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const composeId = useId();
   const emailId = useId();
@@ -154,12 +161,29 @@ export default function SundayJournalPage() {
     };
   }, [date, requestedDate, reloadGathering]);
 
-  const openSignIn = () => {
+  const openSignIn = (intent: "signup" | "signin" = "signin") => {
+    setAuthIntent(intent);
     setSignMessage(null);
     setSignStep("email");
     setSignEmail("");
     signRef.current?.showModal();
   };
+
+  const openSettings = () => {
+    settingsRef.current?.showModal();
+  };
+
+  useEffect(() => {
+    const auth = searchParams.get("auth");
+    if (auth !== "signup" && auth !== "signin") return;
+    if (authLoading) return;
+    if (isMember) {
+      setSearchParams({}, { replace: true });
+      return;
+    }
+    openSignIn(auth);
+    setSearchParams({}, { replace: true });
+  }, [searchParams, setSearchParams, authLoading, isMember]);
 
   const openReport = (postId: string) => {
     if (!isMember) {
@@ -177,6 +201,11 @@ export default function SundayJournalPage() {
   ]
     .filter(Boolean)
     .join(" ");
+
+  const rootProps = {
+    className: rootClass,
+    "data-theme": theme,
+  };
 
   const visiblePosts = posts.filter(
     (p) => filter === "all" || p.kind === filter,
@@ -303,17 +332,43 @@ export default function SundayJournalPage() {
     }
   };
 
-  const handleAvatarClick = async () => {
+  const handleAvatarClick = () => {
     if (!isMember) {
-      openSignIn();
+      openSignIn("signin");
       return;
     }
+    openSettings();
+  };
+
+  const handleSignOut = async () => {
     try {
       await signOut();
+      settingsRef.current?.close();
       announce("Signed out.");
     } catch (err) {
       console.error(err);
       announce("Could not sign out.");
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    const confirmed = window.confirm(
+      "Delete your account permanently? Your posts and replies will be removed. This cannot be undone.",
+    );
+    if (!confirmed) return;
+    setDeleteBusy(true);
+    try {
+      await deleteAccount();
+      settingsRef.current?.close();
+      announce("Your account has been deleted.");
+      navigate("/");
+    } catch (err) {
+      console.error(err);
+      announce(
+        err instanceof Error ? err.message : "Could not delete account.",
+      );
+    } finally {
+      setDeleteBusy(false);
     }
   };
 
@@ -324,7 +379,7 @@ export default function SundayJournalPage() {
 
   if (loadingEdition || authLoading) {
     return (
-      <div className="sunday-journal">
+      <div className="sunday-journal" data-theme={theme}>
         <main className="page-shell" style={{ paddingTop: "6rem" }}>
           <p className="community-subtitle">Loading today’s gathering…</p>
         </main>
@@ -334,7 +389,7 @@ export default function SundayJournalPage() {
 
   if (loadError) {
     return (
-      <div className="sunday-journal">
+      <div className="sunday-journal" data-theme={theme}>
         <main className="page-shell" style={{ paddingTop: "6rem" }}>
           <h1 className="devotion-title">Something went wrong.</h1>
           <p className="community-subtitle">{loadError}</p>
@@ -352,7 +407,7 @@ export default function SundayJournalPage() {
 
   if (editionMissing || !edition) {
     return (
-      <div className="sunday-journal">
+      <div className="sunday-journal" data-theme={theme}>
         <header className="site-header">
           <Link className="brand" to="/today" aria-label="The Way home">
             <span className="brand-name">
@@ -404,7 +459,7 @@ export default function SundayJournalPage() {
   }
 
   return (
-    <div className={rootClass}>
+    <div {...rootProps}>
       <a className="skip" href="#sj-main">
         Skip to today's word
       </a>
@@ -441,15 +496,36 @@ export default function SundayJournalPage() {
           >
             Past days
           </button>
-          <button
-            className="member-avatar"
-            type="button"
-            title={isMember ? "Sign out" : "Join The Way"}
-            aria-label={isMember ? "Sign out" : "Join The Way"}
-            onClick={() => void handleAvatarClick()}
-          >
-            {isMember ? profile?.initials ?? "TW" : "JOIN"}
-          </button>
+          {!isMember ? (
+            <>
+              <button
+                className="text-nav"
+                type="button"
+                onClick={() => openSignIn("signin")}
+              >
+                Sign in
+              </button>
+              <button
+                className="member-avatar"
+                type="button"
+                title="Sign up"
+                aria-label="Sign up"
+                onClick={() => openSignIn("signup")}
+              >
+                JOIN
+              </button>
+            </>
+          ) : (
+            <button
+              className="member-avatar"
+              type="button"
+              title="Settings"
+              aria-label="Open settings"
+              onClick={handleAvatarClick}
+            >
+              {profile?.initials ?? "TW"}
+            </button>
+          )}
         </nav>
       </header>
 
@@ -629,9 +705,22 @@ export default function SundayJournalPage() {
               Read every reflection and prayer request for free. Join with your
               email when you feel ready to respond.
             </p>
-            <button className="publish" type="button" onClick={openSignIn}>
-              Join to respond <span aria-hidden="true">↗</span>
-            </button>
+            <div className="guest-gate-actions">
+              <button
+                className="publish"
+                type="button"
+                onClick={() => openSignIn("signup")}
+              >
+                Sign up <span aria-hidden="true">↗</span>
+              </button>
+              <button
+                className="subtle-button"
+                type="button"
+                onClick={() => openSignIn("signin")}
+              >
+                Already a member? Sign in
+              </button>
+            </div>
           </div>
 
           <div className="archive-notice">
@@ -819,9 +908,11 @@ export default function SundayJournalPage() {
           <div className="dialog-header">
             <div>
               <span className="quiet-label" style={{ color: "var(--rose)" }}>
-                Join the gathering
+                {authIntent === "signup" ? "Create your place" : "Welcome back"}
               </span>
-              <h3 id="sj-sign-title">Come as you are.</h3>
+              <h3 id="sj-sign-title">
+                {authIntent === "signup" ? "Sign up." : "Sign in."}
+              </h3>
             </div>
             <button
               className="dialog-close"
@@ -834,7 +925,9 @@ export default function SundayJournalPage() {
           </div>
           <p className="dialog-text">
             {signStep === "email"
-              ? "One email. No passwords to remember. No inboxes or direct messages. Only our daily reading and a public place to respond."
+              ? authIntent === "signup"
+                ? "One email. No passwords. Enter today’s gathering and respond with your sisters."
+                : "One email. No passwords. We’ll send a code so you can return to the gathering."
               : `Enter the code we sent to ${signEmail}.`}
           </p>
           <form onSubmit={(e) => void handleSignIn(e)}>
@@ -884,10 +977,24 @@ export default function SundayJournalPage() {
                   : "Checking…"
                 : signStep === "email"
                   ? "Continue with email  ↗"
-                  : "Join the gathering  ↗"}
+                  : authIntent === "signup"
+                    ? "Enter the gathering  ↗"
+                    : "Sign in  ↗"}
             </button>
           </form>
-          {signStep === "code" ? (
+          {signStep === "email" ? (
+            <p className="meta-fine" style={{ marginTop: "14px" }}>
+              {authIntent === "signup" ? (
+                <button type="button" onClick={() => setAuthIntent("signin")}>
+                  Already have an account? Sign in
+                </button>
+              ) : (
+                <button type="button" onClick={() => setAuthIntent("signup")}>
+                  New here? Sign up
+                </button>
+              )}
+            </p>
+          ) : (
             <p className="meta-fine" style={{ marginTop: "14px" }}>
               <button
                 type="button"
@@ -899,12 +1006,94 @@ export default function SundayJournalPage() {
                 Use a different email
               </button>
             </p>
-          ) : null}
+          )}
           {signMessage ? (
             <p className="dialog-message" aria-live="polite">
               {signMessage}
             </p>
           ) : null}
+        </div>
+      </dialog>
+
+      <dialog
+        ref={settingsRef}
+        aria-labelledby="sj-settings-title"
+        onClick={(e) => {
+          if (e.target === settingsRef.current) settingsRef.current.close();
+        }}
+      >
+        <div className="dialog-inner">
+          <div className="dialog-header">
+            <div>
+              <span className="quiet-label" style={{ color: "var(--rose)" }}>
+                Your account
+              </span>
+              <h3 id="sj-settings-title">Settings.</h3>
+            </div>
+            <button
+              className="dialog-close"
+              aria-label="Close"
+              type="button"
+              onClick={() => settingsRef.current?.close()}
+            >
+              ×
+            </button>
+          </div>
+          <p className="dialog-text">
+            Signed in as {profile?.displayName ?? "sister"}
+            {user?.email ? ` · ${user.email}` : ""}.
+          </p>
+
+          <div className="settings-block">
+            <p className="quiet-label" style={{ color: "var(--rose)" }}>
+              Appearance
+            </p>
+            <div className="settings-theme" role="group" aria-label="Theme">
+              <button
+                type="button"
+                className={theme === "light" ? "active" : undefined}
+                aria-pressed={theme === "light"}
+                onClick={() => setTheme("light")}
+              >
+                Light
+              </button>
+              <button
+                type="button"
+                className={theme === "dark" ? "active" : undefined}
+                aria-pressed={theme === "dark"}
+                onClick={() => setTheme("dark")}
+              >
+                Dark
+              </button>
+            </div>
+          </div>
+
+          <div className="settings-block">
+            <button
+              className="publish"
+              type="button"
+              style={{ width: "100%" }}
+              onClick={() => void handleSignOut()}
+            >
+              Sign out
+            </button>
+          </div>
+
+          <div className="settings-block settings-danger">
+            <p className="quiet-label">Danger zone</p>
+            <p className="dialog-text" style={{ marginBottom: "16px" }}>
+              Deleting your account removes your profile and Gathering posts.
+              This cannot be undone.
+            </p>
+            <button
+              className="danger-button"
+              type="button"
+              disabled={deleteBusy}
+              onClick={() => void handleDeleteAccount()}
+            >
+              {deleteBusy ? "Deleting…" : "Delete account"}
+            </button>
+          </div>
         </div>
       </dialog>
 

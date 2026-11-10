@@ -88,6 +88,7 @@
     .guest-gate h3{font-family:var(--serif);font-weight:400;font-size:34px;margin:0 0 10px}
     .guest-gate p{color:var(--muted);font-size:14px;line-height:1.65;margin:0 0 20px;max-width:500px}
     .guest-gate .publish{padding-left:28px;padding-right:28px}
+    .guest-gate-actions{display:flex;flex-wrap:wrap;align-items:center;gap:18px}
     &.guest .composition{display:none}
     &.guest .guest-gate{display:block}
     .archive-notice{display:none;padding:26px 0 28px;border-top:1px solid var(--ink);font-family:var(--serif);font-style:italic;font-size:23px;color:var(--muted)}
@@ -209,5 +210,52 @@
     .community{padding-top:68px}
   }
   @media(max-width:350px){.word-panel{padding-left:22px;padding-right:22px}.word-panel .verse{font-size:50px}.devotion-panel{padding-left:24px;padding-right:24px}}
+
+  .settings-block{margin:28px 0 0;padding-top:22px;border-top:1px solid var(--line)}
+  .settings-theme{display:flex;gap:10px;margin-top:14px}
+  .settings-theme button{border:1px solid var(--line);background:transparent;padding:12px 18px;min-height:44px;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+  .settings-theme button.active{border-color:var(--rose);color:var(--ink);font-weight:700}
+  .settings-danger .quiet-label{color:#9a3d4d}
+  .danger-button{border:1px solid #9a3d4d;background:transparent;color:#9a3d4d;padding:14px 18px;min-height:48px;width:100%;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+  .danger-button:hover{background:#9a3d4d;color:#fff}
+  .danger-button:disabled{opacity:.6;cursor:not-allowed}
+
+  &[data-theme="dark"]{
+    --ink:#f3eef1;
+    --muted:#b0a8af;
+    --rose:#c48a9e;
+    --rose-2:#a9788a;
+    --line:#3d363c;
+    --pale:#2a2529;
+    --pale-2:#322c31;
+    --background:#1a171a;
+    --white:#221e22;
+    color:var(--ink);
+    background:var(--background);
+    .site-header{border-bottom-color:var(--line);background:var(--background)}
+    .header-message{color:#9a9298}
+    .member-avatar{border-color:var(--ink)}
+    .member-avatar:hover{background:var(--ink);color:var(--background)}
+    .feature{border-color:var(--ink)}
+    .word-panel{background:var(--pale)}
+    .devotion-panel{background:var(--background)}
+    .composition,.feed-head,.guest-gate,.archive-notice{border-top-color:var(--ink)}
+    .compose-input{color:var(--ink);border-bottom-color:var(--line)}
+    .choice-set button,.filter-buttons button{border-color:var(--line);color:var(--muted)}
+    .choice-set button.active,.filter-buttons button.active{border-color:var(--rose);color:var(--ink)}
+    .publish{background:var(--ink);border-color:var(--ink);color:var(--background)}
+    .publish:hover{background:var(--rose);border-color:var(--rose);color:#fff}
+    .avatar{background:var(--pale-2);border-color:#6a5360;color:var(--rose)}
+    .post{border-bottom-color:var(--line)}
+    .reply-area{border-left-color:#6a5360}
+    .reply-field textarea{background:var(--pale);border-color:var(--line);color:var(--ink)}
+    .reply-field button{background:var(--ink);color:var(--background)}
+    .footer{background:#121014}
+    dialog{background:var(--background);color:var(--ink);border-color:var(--line)}
+    .modal-field{border-bottom-color:var(--ink);color:var(--ink)}
+    .archive-day{border-bottom-color:var(--line)}
+    .settings-theme button{border-color:var(--line);color:var(--muted)}
+    .settings-theme button.active{border-color:var(--rose);color:var(--ink)}
+  }
 
 }
