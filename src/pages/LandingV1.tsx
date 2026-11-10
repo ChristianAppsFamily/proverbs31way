@@ -336,15 +336,16 @@ export default function LandingV1() {
 
             <ScrollFade className="animate-delay-3">
               <div className="ld2-hero-cta mb-10">
-                <Link
-                  to={{ pathname: "/today", search: "?auth=signup" }}
+                <button
+                  type="button"
                   className="ld2-hero-cta-primary"
+                  onClick={() => scrollToSection("waitlist")}
                 >
-                  <span>Sign up</span>
+                  <span>Join the Waitlist</span>
                   <span className="ld2-hero-cta-arrow" aria-hidden="true">
                     ↗
                   </span>
-                </Link>
+                </button>
                 <Link
                   to={{ pathname: "/today", search: "?auth=signin" }}
                   className="ld2-hero-cta-secondary"
@@ -753,9 +754,9 @@ export default function LandingV1() {
               <button type="button" onClick={() => scrollToSection("inside")}>
                 Inside
               </button>
-              <Link to={{ pathname: "/today", search: "?auth=signup" }}>
-                Sign up
-              </Link>
+              <button type="button" onClick={() => scrollToSection("waitlist")}>
+                Join
+              </button>
               <Link to={{ pathname: "/today", search: "?auth=signin" }}>
                 Sign in
               </Link>
