@@ -220,6 +220,75 @@
   .danger-button:hover{background:#9a3d4d;color:#fff}
   .danger-button:disabled{opacity:.6;cursor:not-allowed}
 
+  /* Full-screen sugar-pastel portal — covers the room until it lifts away */
+  &.is-entering{
+    overflow:hidden;
+  }
+  &.is-entering .site-header,
+  &.is-entering .page-shell,
+  &.is-entering .footer{
+    visibility:hidden;
+    pointer-events:none;
+  }
+  .enter-veil{
+    position:fixed;
+    inset:0;
+    z-index:120;
+    display:grid;
+    place-content:center;
+    gap:18px;
+    text-align:center;
+    padding:32px 24px;
+    /* Soft sugar pastels — not the room UI */
+    background:
+      radial-gradient(ellipse 90% 70% at 50% 42%, #fff8fb 0%, #f7e8ef 38%, #efe0e6 68%, #e8d4dc 100%);
+    pointer-events:all;
+    opacity:0;
+    transform:scale(1.015);
+  }
+  .enter-veil::before{
+    content:"";
+    position:absolute;
+    inset:12% 18%;
+    border:1px solid rgba(117,71,91,0.14);
+    pointer-events:none;
+  }
+  .enter-veil--in{animation:sjVeilIn 1.05s ease forwards}
+  .enter-veil--hold{opacity:1;transform:none}
+  .enter-veil--out{animation:sjVeilOut 1.65s ease forwards}
+  .enter-veil-kicker{
+    position:relative;
+    margin:0;
+    font-family:var(--serif);
+    font-size:clamp(48px,9vw,84px);
+    letter-spacing:-.065em;
+    color:#242027;
+    line-height:1;
+  }
+  .enter-veil-line{
+    position:relative;
+    margin:0;
+    font-family:var(--serif);
+    font-style:italic;
+    font-size:clamp(24px,3.6vw,36px);
+    color:#75475b;
+    letter-spacing:-.012em;
+  }
+  @keyframes sjVeilIn{
+    from{opacity:0;transform:scale(1.04)}
+    to{opacity:1;transform:none}
+  }
+  @keyframes sjVeilOut{
+    from{opacity:1;transform:none}
+    to{opacity:0;transform:scale(1.02) translateY(-18px)}
+  }
+  @media (prefers-reduced-motion:reduce){
+    &.is-entering .site-header,
+    &.is-entering .page-shell,
+    &.is-entering .footer{visibility:visible;pointer-events:auto}
+    .enter-veil,.enter-veil--in,.enter-veil--out{animation:none;opacity:0;pointer:hidden}
+  }
+
   &[data-theme="dark"]{
     --ink:#f3eef1;
     --muted:#b0a8af;
@@ -256,6 +325,13 @@
     .archive-day{border-bottom-color:var(--line)}
     .settings-theme button{border-color:var(--line);color:var(--muted)}
     .settings-theme button.active{border-color:var(--rose);color:var(--ink)}
+    /* Welcome portal stays sugar-pastel even in dark mode */
+    .enter-veil{
+      background:
+        radial-gradient(ellipse 90% 70% at 50% 42%, #fff8fb 0%, #f7e8ef 38%, #efe0e6 68%, #e8d4dc 100%);
+    }
+    .enter-veil-kicker{color:#242027}
+    .enter-veil-line{color:#75475b}
   }
 
 }

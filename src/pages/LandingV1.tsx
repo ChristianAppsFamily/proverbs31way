@@ -335,13 +335,19 @@ export default function LandingV1() {
             </ScrollFade>
 
             <ScrollFade className="animate-delay-3">
-              <div className="flex flex-wrap items-center gap-5 mb-8">
-                <Link to="/today?auth=signup" className="ld2-btn">
-                  Sign up
+              <div className="ld2-hero-cta mb-10">
+                <Link
+                  to={{ pathname: "/today", search: "?auth=signup" }}
+                  className="ld2-hero-cta-primary"
+                >
+                  <span>Sign up</span>
+                  <span className="ld2-hero-cta-arrow" aria-hidden="true">
+                    ↗
+                  </span>
                 </Link>
                 <Link
-                  to="/today?auth=signin"
-                  className="ld2-btn ld2-btn-outline"
+                  to={{ pathname: "/today", search: "?auth=signin" }}
+                  className="ld2-hero-cta-secondary"
                 >
                   Sign in
                 </Link>
@@ -747,8 +753,12 @@ export default function LandingV1() {
               <button type="button" onClick={() => scrollToSection("inside")}>
                 Inside
               </button>
-              <Link to="/today?auth=signup">Sign up</Link>
-              <Link to="/today?auth=signin">Sign in</Link>
+              <Link to={{ pathname: "/today", search: "?auth=signup" }}>
+                Sign up
+              </Link>
+              <Link to={{ pathname: "/today", search: "?auth=signin" }}>
+                Sign in
+              </Link>
               <a href="mailto:christianappempire@gmail.com">Contact</a>
             </div>
           </div>

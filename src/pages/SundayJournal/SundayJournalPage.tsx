@@ -61,6 +61,10 @@ export default function SundayJournalPage() {
   const [signStep, setSignStep] = useState<"email" | "code">("email");
   const [authIntent, setAuthIntent] = useState<"signup" | "signin">("signin");
   const [deleteBusy, setDeleteBusy] = useState(false);
+  const [enterOverlay, setEnterOverlay] = useState<{
+    phase: "in" | "hold" | "out";
+    message: string;
+  } | null>(null);
   const codeId = useId();
   const [reportPostId, setReportPostId] = useState<string | null>(null);
   const [busyPostId, setBusyPostId] = useState<string | null>(null);
@@ -198,6 +202,7 @@ export default function SundayJournalPage() {
     "sunday-journal",
     !isMember ? "guest" : "",
     isPast ? "past" : "",
+    enterOverlay ? "is-entering" : "",
   ]
     .filter(Boolean)
     .join(" ");
@@ -318,7 +323,32 @@ export default function SundayJournalPage() {
         signRef.current?.close();
         setSignStep("email");
         setSignMessage(null);
-        announce("Welcome. You’re signed in.");
+        const message =
+          authIntent === "signup"
+            ? "Welcome home."
+            : "The gathering is waiting.";
+        setEnterOverlay({ phase: "in", message });
+        window.setTimeout(() => {
+          setEnterOverlay((prev) =>
+            prev ? { ...prev, phase: "hold" } : prev,
+          );
+        }, 80);
+        window.setTimeout(() => {
+          setEnterOverlay((prev) =>
+            prev ? { ...prev, phase: "out" } : prev,
+          );
+          document
+            .getElementById("sj-community")
+            ?.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 1600);
+        window.setTimeout(() => {
+          setEnterOverlay(null);
+          announce(
+            authIntent === "signup"
+              ? "You’re in. Add your voice when you’re ready."
+              : "Welcome back.",
+          );
+        }, 3200);
       }
     } catch (err) {
       console.error(err);
@@ -1229,6 +1259,17 @@ export default function SundayJournalPage() {
           </form>
         </div>
       </dialog>
+
+      {enterOverlay ? (
+        <div
+          className={`enter-veil enter-veil--${enterOverlay.phase}`}
+          role="status"
+          aria-live="polite"
+        >
+          <p className="enter-veil-kicker">the way.</p>
+          <p className="enter-veil-line">{enterOverlay.message}</p>
+        </div>
+      ) : null}
 
       <div id="toast" role="status" hidden={!toast}>
         {toast}

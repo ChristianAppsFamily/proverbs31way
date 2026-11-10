@@ -127,6 +127,130 @@
   color: var(--white);
 }
 
+/* Hero auth CTAs — cinematic, not twin utility boxes */
+.landing-d2 .ld2-hero-cta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.75rem 2.25rem;
+}
+
+.landing-d2 .ld2-hero-cta-primary {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.85rem;
+  min-height: 56px;
+  padding: 1.05rem 1.85rem 1.05rem 1.7rem;
+  border: 0;
+  background: var(--ink);
+  color: #f7f3f6;
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  text-decoration: none;
+  overflow: hidden;
+  transition:
+    background 0.45s ease,
+    color 0.45s ease,
+    transform 0.45s ease,
+    letter-spacing 0.45s ease;
+}
+
+.landing-d2 .ld2-hero-cta-primary::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 0%,
+    rgba(247, 243, 246, 0.12) 42%,
+    transparent 68%
+  );
+  transform: translateX(-120%);
+  transition: transform 0.7s ease;
+  pointer-events: none;
+}
+
+.landing-d2 .ld2-hero-cta-primary:hover {
+  background: var(--rose);
+  letter-spacing: 0.26em;
+  transform: translateY(-1px);
+}
+
+.landing-d2 .ld2-hero-cta-primary:hover::before {
+  transform: translateX(120%);
+}
+
+.landing-d2 .ld2-hero-cta-arrow {
+  font-size: 14px;
+  line-height: 1;
+  letter-spacing: 0;
+  transition: transform 0.45s ease;
+}
+
+.landing-d2 .ld2-hero-cta-primary:hover .ld2-hero-cta-arrow {
+  transform: translate(2px, -2px);
+}
+
+.landing-d2 .ld2-hero-cta-secondary {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0 0.55rem;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: color 0.35s ease;
+}
+
+.landing-d2 .ld2-hero-cta-secondary::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: var(--ink);
+  transform: scaleX(0.35);
+  transform-origin: left center;
+  transition:
+    transform 0.45s ease,
+    background 0.35s ease;
+}
+
+.landing-d2 .ld2-hero-cta-secondary:hover {
+  color: var(--rose);
+}
+
+.landing-d2 .ld2-hero-cta-secondary:hover::after {
+  transform: scaleX(1);
+  background: var(--rose);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-d2 .ld2-hero-cta-primary,
+  .landing-d2 .ld2-hero-cta-primary::before,
+  .landing-d2 .ld2-hero-cta-arrow,
+  .landing-d2 .ld2-hero-cta-secondary,
+  .landing-d2 .ld2-hero-cta-secondary::after {
+    transition: none;
+  }
+
+  .landing-d2 .ld2-hero-cta-primary:hover {
+    transform: none;
+    letter-spacing: 0.22em;
+  }
+}
+
 .landing-d2 .ld2-input {
   width: 100%;
   min-height: 50px;
