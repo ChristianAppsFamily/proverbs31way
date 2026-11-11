@@ -346,12 +346,6 @@ export default function LandingV1() {
                     ↗
                   </span>
                 </button>
-                <Link
-                  to={{ pathname: "/today", search: "?auth=signin" }}
-                  className="ld2-hero-cta-secondary"
-                >
-                  Sign in
-                </Link>
               </div>
             </ScrollFade>
 
@@ -757,9 +751,6 @@ export default function LandingV1() {
               <button type="button" onClick={() => scrollToSection("waitlist")}>
                 Join
               </button>
-              <Link to={{ pathname: "/today", search: "?auth=signin" }}>
-                Sign in
-              </Link>
               <a href="mailto:christianappempire@gmail.com">Contact</a>
             </div>
           </div>
